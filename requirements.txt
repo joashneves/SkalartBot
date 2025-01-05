@@ -1,0 +1,3 @@
+discord
+autopep8
+python-dotenv

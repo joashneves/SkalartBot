@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "Skalartbot"
+version = "0.1.0"
+description = "A Discord bot implemented in Python"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Joas Neves", email = "joashneves@gmail.com" }]
+dependencies = [
+    "discord.py",
+    "autopep8",
+    "python-dotenv"
+]
+requires-python = ">=3.8"
+
+[project.scripts]
+discord-bot = "bot.main:main"

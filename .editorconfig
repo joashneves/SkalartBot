@@ -1,0 +1,15 @@
+# Indica que este é o arquivo .editorconfig principal
+root = true
+
+# Aplicar estas regras a todos os arquivos
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Configuração específica para arquivos Python
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 79
