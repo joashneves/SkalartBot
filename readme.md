@@ -1,7 +1,9 @@
 # Comando para baixar as depedencias e inicar o bot
 
-````bash
+```bash
 pip install -e .
+```
 
+```bash
 discord-bot
 ```
