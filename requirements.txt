@@ -3,3 +3,4 @@ autopep8
 python-dotenv
 pytest
 dpytest
+pytest-asyncio
