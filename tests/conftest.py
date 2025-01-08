@@ -11,7 +11,7 @@ async def bot(request):
     intents = discord.Intents.default()
     intents.members = True
     intents.message_content = True
-    b = commands.Bot(command_prefix="!",
+    b = commands.Bot(command_prefix="$",
                      intents=intents)
     # set up the loop
     if isinstance(b.loop, _LoopSentinel):
