@@ -11,7 +11,9 @@ authors = [{ name = "Joas Neves", email = "joashneves@gmail.com" }]
 dependencies = [
     "discord.py",
     "autopep8",
-    "python-dotenv"
+    "python-dotenv",
+    "pytest",
+    "dpytest"
 ]
 requires-python = ">=3.11.9"
 
