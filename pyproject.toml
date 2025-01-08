@@ -14,7 +14,7 @@ dependencies = [
     "python-dotenv",
     "pytest",
     "dpytest",
-    "pytest-asyncio"
+    "pre-commit"
 ]
 requires-python = ">=3.11.9"
 
