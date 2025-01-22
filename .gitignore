@@ -9,7 +9,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+dados.db
 # Distribution / packaging
 .Python
 build/

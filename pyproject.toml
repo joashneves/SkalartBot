@@ -14,7 +14,8 @@ dependencies = [
     "python-dotenv",
     "pytest",
     "dpytest",
-    "pre-commit"
+    "pre-commit",
+    "sqlalchemy",
 ]
 requires-python = ">=3.11.9"
 
@@ -22,4 +23,8 @@ requires-python = ">=3.11.9"
 python = "^3.11.9"
 
 [project.scripts]
-discord-bot = "bot.main:main"
+discord-bot = "src.main:main"
+
+[tool.setuptools.packages.find]
+include = ["src"]
+
