@@ -4,3 +4,4 @@ python-dotenv
 pytest
 dpytest
 pre-commit
+sqlalchemy
