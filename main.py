@@ -8,7 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from pathlib import Path
-from database.db import Usuario
+from models.db import _Sessao, Usuario
 
 load_dotenv()
 
