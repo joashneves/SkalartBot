@@ -35,7 +35,11 @@ async def on_ready():
     """
     print("print")
     await carregar_comandos()
-    await bot.tree.sync()
+    try:
+        synced = await bot.tree.sync()  # Sincroniza os comandos de barra
+        print(f"Comandos de barra sincronizados: {len(synced)} comandos")
+    except Exception as e:
+        print(f"Erro ao sincronizar comandos de barra: {e}")
     print(f"Bot {bot.user.name} está online!")
     return "Bot Online"
 

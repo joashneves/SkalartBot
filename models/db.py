@@ -9,16 +9,17 @@ class Usuario(Base):
     __tablename__ = 'Usuario'
 
     id = Column(Integer, primary_key=True)
-    id_discord = Column(Integer)
+    id_discord = Column(String)
     apelido = Column(String, default='apelido')
     usuario = Column(String, default='usuario')
+    rede_social = Column(String, default='url')
     descricao = Column(String, default='descrição')
     pronome = Column(String, default='N/a')
+    caminho_arquivo = Column(String, nullable=True)
     level = Column(Integer, default=0)
     xp = Column(Integer, default=0)
     saldo = Column(Integer, default=0)
     data_criacao = Column(Integer, default=0)
-
 
 class ServidorConfig(Base):
     __tablename__ = 'servidorConfig'

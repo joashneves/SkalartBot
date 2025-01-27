@@ -1,7 +1,7 @@
 
 from models.db import _Sessao, AvatarSalvo
 
-class Obter_Avatar():
+class Manipular_Avatar():
     def obter_Avatar(id_discord:str,caminho_arquivo:str, data_arquivo:str):
         with _Sessao() as sessao:
             servidor_db = sessao.query(AvatarSalvo).filter_by(id_discord=id_discord).first()
