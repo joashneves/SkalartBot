@@ -5,7 +5,6 @@ import random
 import os
 from dotenv import load_dotenv
 import discord
-from discord import app_commands
 from discord.ext import commands
 from pathlib import Path
 from models import Obter_cargo
@@ -21,12 +20,16 @@ permissoes.message_content = True
 permissoes.members = True
 
 """Atribui um único cargo automaticamente a novos membros, caso o membro não tenha nenhum dos cargos."""
+
+
 async def atribuir_cargos(member: discord.Member):
     id_guild = str(member.guild.id)
     cargos_ids = Obter_cargo.Manipular_Cargo.obter_Cargo(id_guild)
     print(f"Verificando cargos para o guild_id: {id_guild}")
     # Verifica se o membro já possui algum dos cargos
-    cargos_do_membro = [cargo for cargo in member.roles if cargo.id in map(int, cargos_ids)]
+    cargos_do_membro = [
+        cargo for cargo in member.roles if cargo.id in map(int, cargos_ids)
+    ]
     if cargos_do_membro:
         print(f"{member.name} já tem um dos cargos, ignorando atribuição.")
         return  # Ignora se o membro já tem um dos cargos
@@ -38,19 +41,23 @@ async def atribuir_cargos(member: discord.Member):
             await member.add_roles(cargo)
             print(f"Cargo {cargo.name} atribuído a {member.name}.")
 
+
 # Criação do bot de forma síncrona
 bot = commands.Bot(command_prefix="$", intents=permissoes)
 
+
 async def carregar_comandos():
-    for arquivo in os.listdir('comandos'):
-        if arquivo.endswith('.py'):
+    for arquivo in os.listdir("comandos"):
+        if arquivo.endswith(".py"):
             await bot.load_extension(f"comandos.{arquivo[:-3]}")
+
 
 # Evento quando um membro entra no servidor
 @bot.event
 async def on_member_join(member: discord.Member):
     """Atribui cargos automaticamente quando um membro entra no servidor."""
     await atribuir_cargos(member)
+
 
 @bot.event
 async def on_ready():
@@ -70,6 +77,7 @@ async def on_ready():
         print(f"Erro ao sincronizar comandos de barra: {e}")
     print(f"Bot {bot.user.name} está online!")
     return "Bot Online"
+
 
 # Função main para ser chamada no script
 def main():
