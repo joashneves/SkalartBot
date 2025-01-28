@@ -16,7 +16,6 @@ dependencies = [
     "dpytest",
     "pre-commit",
     "sqlalchemy",
-    "audioop"
 ]
 requires-python = ">=3.11.9"
 
