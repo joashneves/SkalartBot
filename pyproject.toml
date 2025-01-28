@@ -16,6 +16,7 @@ dependencies = [
     "dpytest",
     "pre-commit",
     "sqlalchemy",
+    "audioop"
 ]
 requires-python = ">=3.11.9"
 
@@ -27,4 +28,3 @@ discord-bot = "src.main:main"
 
 [tool.setuptools.packages.find]
 include = ["src"]
-
