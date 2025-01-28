@@ -6,6 +6,7 @@ import aiohttp
 import hashlib
 from datetime import datetime
 from models.db import _Sessao, AvatarSalvo
+from pathlib import Path
 
 AVATAR_DIR = "imagens_avatars"
 os.makedirs(AVATAR_DIR, exist_ok=True)
@@ -88,6 +89,7 @@ class Avatar(commands.Cog):
                 embed.set_image(
                     url=f"attachment://{os.path.basename(avatares[0].caminho_arquivo)}"
                 )
+                print(avatares[0].caminho_arquivo)
                 avatar_file = discord.File(avatares[0].caminho_arquivo)
                 view = AvatarView(avatares, membro)
                 await ctx.send(embed=embed, file=avatar_file, view=view)
