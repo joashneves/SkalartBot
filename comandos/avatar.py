@@ -89,10 +89,8 @@ class Avatar(commands.Cog):
                 embed.set_image(
                     url=f"attachment://{os.path.basename(avatares[0].caminho_arquivo)}"
                 )
-                caminho_arquivo = avatares[0].caminho_arquivo.replace("\\", "\\\\")
-                print(f"Caminho ajustado: {caminho_arquivo}")
-
-                avatar_file = discord.File(caminho_arquivo)
+                print(avatares[0].caminho_arquivo)
+                avatar_file = discord.File(avatares[0].caminho_arquivo)
                 view = AvatarView(avatares, membro)
                 await ctx.send(embed=embed, file=avatar_file, view=view)
             else:
