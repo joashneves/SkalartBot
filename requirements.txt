@@ -5,3 +5,4 @@ pytest
 dpytest
 pre-commit
 sqlalchemy
+audioop-lts
