@@ -1,4 +1,3 @@
-
 from models.db import _Sessao, AvatarSalvo
 
 class Manipular_Avatar():
