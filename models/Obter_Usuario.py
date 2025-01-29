@@ -37,3 +37,23 @@ class Manipular_Usuario:
                 sessao.commit()
                 return usuario
             return "Usuario ja existe"
+
+    @staticmethod
+    def adicionar_moedas(id_discord: str, moedas: int):
+        with _Sessao() as sessao:
+            usuario = sessao.query(Usuario).filter_by(id_discord=id_discord).first()
+            if usuario:
+                usuario.saldo += moedas
+                sessao.commit()
+                return usuario
+            return None
+
+    @staticmethod
+    def adicionar_xp(id_discord: str, experience: int):
+        with _Sessao() as sessao:
+            usuario = sessao.query(Usuario).filter_by(id_discord=id_discord).first()
+            if usuario:
+                usuario.xp += experience
+                sessao.commit()
+                return usuario
+            return None
