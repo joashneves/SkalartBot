@@ -7,7 +7,6 @@ class Manipular_Chat:
         with _Sessao() as sessao:
             chat = sessao.query(ServidorConfig).filter_by(channel_id=channel_id).first()
             if not chat:
-                print(f"Chat não existe.")
                 return None
             return chat
 
