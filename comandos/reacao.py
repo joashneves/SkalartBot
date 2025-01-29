@@ -97,7 +97,7 @@ class Reacao(commands.Cog):
             if message.attachments:
                 for attachment in message.attachments:
                     if attachment.filename.lower().endswith(
-                        (".png", ".jpg", ".jpeg", ".gif", ".webp")
+                        (".png", ".jpg", ".jpeg", ".gif", ".webp", ".mp4")
                     ):
                         for emoji in REACTION_EMOJIS:
                             await message.add_reaction(emoji)

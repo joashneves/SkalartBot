@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 from pathlib import Path
-from models import Obter_cargo
 from models.db import _Sessao, Usuario
+from models import Obter_cargo
 
 load_dotenv()
 
