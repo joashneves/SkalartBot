@@ -40,4 +40,13 @@ class CargosSalvos(Base):
     guild_id = Column(String, nullable=True)
     cargo_id = Column(String, nullable=True)
 
+class ImagemGuarda(Base):
+    __tablename__ = 'imagemGuarda'
+    id = Column(Integer, primary_key=True, index=True)
+    id_discord = Column(String, nullable=True)
+    caminho_arquivo = Column(String, nullable=True)
+    descricao = Column(String, nullable=True)
+    data_arquivo = Column(DateTime, nullable=False)
+
+
 Base.metadata.create_all(engine)

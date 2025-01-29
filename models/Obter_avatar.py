@@ -9,7 +9,6 @@ class Manipular_Avatar():
                                         caminho_arquiv=caminho_arquivo,
                                         data_arquivo=data_arquivo)
                 sessao.add(new_chat)
-
                 sessao.commit()
         return servidor_db
 
