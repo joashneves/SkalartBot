@@ -63,6 +63,11 @@ class Manipular_Usuario:
             usuario = sessao.query(Usuario).filter_by(id_discord=id_discord).first()
             if usuario:
                 usuario.xp += experience
+                # Verifica se o XP atingiu ou ultrapassou o limite para o próximo nível
+                xp_necessario = 100 * ((usuario.level + 1)* 2.5)  # O limite de XP para o próximo nível
+                if usuario.xp >= xp_necessario:
+                    usuario.level += 1  # Sobe o nível
+                    usuario.xp = 0  # Zera o XP
                 sessao.commit()
                 return usuario
             return None

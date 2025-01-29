@@ -48,5 +48,13 @@ class ImagemGuarda(Base):
     descricao = Column(String, nullable=True)
     data_arquivo = Column(DateTime, nullable=False)
 
+class DiaGuarda(Base):
+    __tablename__ = 'diaGuarda'
+    id = Column(Integer, primary_key=True, index=True)
+    id_discord = Column(String, nullable=True)
+    bomdia = Column(Integer, default=0 ,nullable=False)
+    boanoite = Column(Integer, default=0 ,nullable=False)
+    bomdia_data = Column(DateTime ,nullable=False)
+    boanoite_data = Column(DateTime ,nullable=False)
 
 Base.metadata.create_all(engine)
