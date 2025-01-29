@@ -9,6 +9,15 @@ class Manipular_Usuario:
                 return
             return usuario
 
+    @staticmethod
+    def obter_todos_usuarios():
+        with _Sessao() as sessao:
+            usuarios = sessao.query(Usuario).all()
+            if not usuarios:
+                print("Nenhum usuário encontrado.")
+                return []
+            return usuarios
+
     def atualizar_usuario(id_discord: int, apelido: str, descricao: str, rede_social:str ,pronome: str = "N/a"):
         with _Sessao() as sessao:
             usuario = sessao.query(Usuario).filter_by(id_discord=id_discord).first()

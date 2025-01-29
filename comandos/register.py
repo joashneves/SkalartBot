@@ -4,6 +4,52 @@ from discord import app_commands
 from models import Obter_Usuario
 from models.Obter_imagem import Manipular_Imagem
 
+class UsuariosView(discord.ui.View):
+    def __init__(self, usuarios, interaction, bot):
+        super().__init__(timeout=60)  # Timeout de 60 segundos
+        self.usuarios = usuarios
+        self.interaction = interaction
+        self.bot = bot  # Agora a instância do bot é armazenada
+        self.index = 0  # Índice para navegação entre os usuários
+
+    async def update_embed(self, interaction: discord.Interaction):
+        usuario = self.usuarios[self.index]
+        usuario_id = usuario.id_discord
+        embed = discord.Embed(
+            title=f"👤 Perfil de {usuario.apelido or 'Usuário'}",
+            description="Aqui estão os detalhes do usuário:",
+            color=discord.Color.green()
+        )
+        # Buscar o usuário no Discord para pegar o avatar
+        try:
+            usuario_discord = await self.bot.fetch_user(usuario_id)  # Usa a instância do bot
+            avatar_url = usuario_discord.avatar.url if usuario_discord.avatar else None
+        except discord.NotFound:
+            avatar_url = None  # Caso o usuário não seja encontrado
+
+        embed.add_field(name="📝 Descrição", value=usuario.descricao or "Nenhuma descrição.", inline=False)
+        embed.add_field(name="🔗 Social", value=usuario.rede_social or "Não informado", inline=False)
+        embed.add_field(name="🔤 Pronomes", value=usuario.pronome or "Não informado", inline=False)
+        embed.add_field(name="📊 Level", value=f"{usuario.level}", inline=True)
+        embed.add_field(name="⭐ XP", value=f"{usuario.xp}", inline=True)
+        embed.add_field(name="💰 Saldo", value=f"{usuario.saldo} moedas", inline=True)
+        # Se tiver um avatar, mostra no embed
+        if avatar_url:
+            embed.set_thumbnail(url=avatar_url)
+
+        await interaction.response.edit_message(embed=embed, view=self)
+
+    @discord.ui.button(label="⬅️ Anterior", style=discord.ButtonStyle.primary)
+    async def anterior(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Vai para o usuário anterior na lista."""
+        self.index = (self.index - 1) % len(self.usuarios)
+        await self.update_embed(interaction)
+
+    @discord.ui.button(label="➡️ Próximo", style=discord.ButtonStyle.primary)
+    async def proximo(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Vai para o próximo usuário na lista."""
+        self.index = (self.index + 1) % len(self.usuarios)
+        await self.update_embed(interaction)
 
 class RegisterModal(discord.ui.Modal):
     def __init__(self):
@@ -118,6 +164,40 @@ class Registrar(commands.Cog):
 
         await interaction.response.send_message(embed=embed, view=view)
 
+    @app_commands.command(name="usuarios_registrados", description="Exibe todos os usuários registrados no sistema")
+    async def usuarios_registrados(self, interaction: discord.Interaction):
+        usuarios = Obter_Usuario.Manipular_Usuario.obter_todos_usuarios()
+
+        if not usuarios:
+            await interaction.response.send_message("❌ Não há usuários registrados no momento.", ephemeral=True)
+            return
+
+        # Cria o embed inicial com o primeiro usuário
+        usuario = usuarios[0]
+        embed = discord.Embed(
+            title=f"👤 Perfil de {usuario.apelido or 'Usuário'}",
+            description="Aqui estão os detalhes do usuário:",
+            color=discord.Color.green()
+        )
+        usuario_id = usuario.id_discord
+          # Buscar o usuário no Discord para pegar o avatar
+        try:
+            usuario_discord = await self.bot.fetch_user(usuario_id)
+            avatar_url = usuario_discord.avatar.url if usuario_discord.avatar else None
+        except discord.NotFound:
+            avatar_url = None  # Caso o usuário não seja encontrado
+        embed.add_field(name="📝 Descrição", value=usuario.descricao or "Nenhuma descrição.", inline=False)
+        embed.add_field(name="🔗 Social", value=usuario.rede_social or "Não informado", inline=False)
+        embed.add_field(name="🔤 Pronomes", value=usuario.pronome or "Não informado", inline=False)
+        embed.add_field(name="📊 Level", value=f"{usuario.level}", inline=True)
+        embed.add_field(name="⭐ XP", value=f"{usuario.xp}", inline=True)
+        embed.add_field(name="💰 Saldo", value=f"{usuario.saldo} moedas", inline=True)
+        # Se tiver um avatar, mostra no embed
+        if avatar_url:
+            embed.set_thumbnail(url=avatar_url)
+
+        usuarios_view = UsuariosView(usuarios, interaction, self.bot)
+        await interaction.response.send_message(embed=embed, view=usuarios_view)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Registrar(bot))
