@@ -3,9 +3,9 @@ from models.db import _Sessao, FeedConfig
 
 class Manipular_Feed:
     @staticmethod
-    def obter_chat(channel_id: str):
+    def obter_chat():
         with _Sessao() as sessao:
-            chat = sessao.query(FeedConfig).filter_by(channel_id=channel_id).first()
+            chat = sessao.query(FeedConfig).all()
             if not chat:
                 return None
             return chat

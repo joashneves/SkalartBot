@@ -4,6 +4,7 @@ from discord.ext import commands
 from discord import app_commands
 from models import Obter_Usuario
 from models.Obter_imagem import Manipular_Imagem
+from models.Obter_Feed import Manipular_Feed
 from dotenv import load_dotenv
 import random
 
@@ -93,6 +94,7 @@ class AdicionarImagem(commands.Cog):
         descricao: str,
     ):
         id_discord = str(interaction.user.id)
+        guild_id = str(interaction.guild.id)
 
         # Verifica se o usuário está registrado
         usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(id_discord)
@@ -131,11 +133,32 @@ class AdicionarImagem(commands.Cog):
                     ephemeral=True,
                 )
                 return
-            print(f"Saldo e xp adicionado em : {usuario_atualizado}")
-        else:
-            await interaction.response.send_message(
-                "Ocorreu um erro ao salvar a imagem. Tente novamente.", ephemeral=True
-            )
+            # Agora, obtemos todos os canais registrados para a guilda
+            canais_configurados = Manipular_Feed.obter_chat()
+            print(f"Canais configurados: {canais_configurados}")
+
+            if canais_configurados:
+                # Envia a mensagem para todos os canais registrados
+                for canal in canais_configurados:
+                    # Obtém o canal pelo ID
+                    print(
+                        f"Canal ID: {canal.id}, Guild ID: {canal.guild_id}, Channel ID: {canal.channel_id}"
+                    )
+                    channel = interaction.client.get_channel(int(canal.channel_id))
+
+                    print(channel)
+                    if channel is not None and isinstance(channel, discord.TextChannel):
+
+                        # Verifica se o usuário é membro do servidor
+                        if interaction.guild.get_member(int(id_discord)):
+                            try:
+                                await channel.send(
+                                    f"Nova imagem enviada por {interaction.user.mention}!\n**Descrição:** {descricao}\n[Veja a imagem aqui]({caminho_arquivo})"
+                                )
+                            except discord.DiscordException as e:
+                                print(
+                                    f"Erro ao enviar mensagem para o canal {channel.name}: {e}"
+                                )
 
     @app_commands.command(
         name="imagem_aleatoria",
