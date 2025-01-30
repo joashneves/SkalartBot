@@ -1,7 +1,9 @@
 import discord
 from discord.ext import commands
 from datetime import datetime
+from models import Obter_Usuario
 from models.Obter_dia import Manipular_dia
+import random
 
 class MonitorarSaudacoes(commands.Cog):
     def __init__(self, bot):
@@ -11,38 +13,53 @@ class MonitorarSaudacoes(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return  # Ignora mensagens de bots
-
+        id_discord = str(message.author.id)
         conteudo = message.content.lower()
         hora_atual = datetime.now().hour  # Obtém a hora atual
-        dia_atual = datetime.now()
+        dia_atual = datetime.now().date()
+        # Gera moedas e xp aleatórios
+        moedas_ganhas = random.randint(1, 5)  # Gera entre 10 e 50 moedas
+        xp_ganho = random.randint(10, 50)  # Gera entre 1 e 3 xp
 
         # Verifica se o usuário deu bom dia ou boa noite
         if 'bom dia' in conteudo:
             if hora_atual < 12:  # Permite dar bom dia somente antes das 12h
                 bomdia = Manipular_dia.obter_bomdia(message.author.id)
                 if bomdia:
-                    if bomdia["data_bomdia"] != dia_atual:
+                    if bomdia["data_bomdia"].date() != dia_atual:
                         Manipular_dia.registrar_bomdia(message.author.id)
-                        await message.channel.send(f"Bom dia, {message.author.mention}! Você já disse bom dia {bomdia['numero_bomdia'] + 1} vezes.")
+                        await message.channel.send(f"Bom dia, {message.author.mention}!")
+                    else:
+                        return
                 else:
                     # Se for a primeira vez, registra e confirma
                     Manipular_dia.registrar_bomdia(message.author.id)
                     await message.channel.send(f"Bom dia, {message.author.mention}!")
             else:
-                await message.channel.send(f"Você não pode mais dar bom dia, {message.author.mention}. Já passou das 12h!")
+                await message.channel.send(f"Já passou das 12h!")
+                return
 
         elif 'boa noite' in conteudo:
             if hora_atual >= 18:  # Permite dar boa noite somente depois das 18h
                 boanoite = Manipular_dia.obter_boanoite(message.author.id)
                 if boanoite:
-                        if boanoite["data_boanoite"] != dia_atual:
+                        if boanoite["data_boanoite"].date() != dia_atual:
+                            print(boanoite["data_boanoite"], dia_atual)
                             Manipular_dia.registrar_boanoite(message.author.id)
-                            await message.channel.send(f"Você já deu boa noite, {message.author.mention}, e não pode dar outra boa noite hoje.")
+                            await message.channel.send(f"Boa noite")
+                        else:
+                            return
                 else:
                     Manipular_dia.registrar_boanoite(message.author.id)
                     await message.channel.send(f"Boa noite, {message.author.mention}!")
             else:
-                await message.channel.send(f"Você não pode dar boa noite agora, {message.author.mention}. Só é permitido após às 18h!")
+                await message.channel.send(f"Ainda não é noite")
+                return
+        usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(id_discord)
+        if usuario_registrado:
+            usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(id_discord, moedas_ganhas)
+            usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_xp(id_discord, xp_ganho)
+            print(usuario_atualizado)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MonitorarSaudacoes(bot))
