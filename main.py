@@ -76,6 +76,12 @@ async def on_ready():
     except Exception as e:
         print(f"Erro ao sincronizar comandos de barra: {e}")
     print(f"Bot {bot.user.name} está online!")
+
+    await bot.change_presence(
+        activity=discord.Activity(
+        type=discord.ActivityType.watching,
+        name="Por todo tempo e espaço"))
+
     return "Bot Online"
 
 
