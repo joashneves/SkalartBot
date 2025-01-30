@@ -23,6 +23,7 @@ class MonitorarSaudacoes(commands.Cog):
 
         # Verifica se o usuário deu bom dia ou boa noite
         if 'bom dia' in conteudo:
+            print(dia_atual)
             if hora_atual < 12:  # Permite dar bom dia somente antes das 12h
                 bomdia = Manipular_dia.obter_bomdia(message.author.id)
                 if bomdia:
@@ -45,6 +46,7 @@ class MonitorarSaudacoes(commands.Cog):
                 print(usuario_atualizado)
 
         elif 'boa noite' in conteudo:
+            print(dia_atual)
             if hora_atual >= 18:  # Permite dar boa noite somente depois das 18h
                 boanoite = Manipular_dia.obter_boanoite(message.author.id)
                 if boanoite:
