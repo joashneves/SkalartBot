@@ -67,7 +67,10 @@ class MonitorarSaudacoes(commands.Cog):
                 usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(id_discord, moedas_ganhas)
                 usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_xp(id_discord, xp_ganho)
                 print(usuario_atualizado)
+<<<<<<< HEAD
 
+=======
+>>>>>>> a5b1e147e5a72e999deec1d2215ac63188d17df2
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MonitorarSaudacoes(bot))
