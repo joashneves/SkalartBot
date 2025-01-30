@@ -23,6 +23,7 @@ class MonitorarSaudacoes(commands.Cog):
 
         # Verifica se o usuário deu bom dia ou boa noite
         if 'bom dia' in conteudo:
+            print(dia_atual)
             if hora_atual < 12:  # Permite dar bom dia somente antes das 12h
                 bomdia = Manipular_dia.obter_bomdia(message.author.id)
                 if bomdia:
@@ -38,8 +39,14 @@ class MonitorarSaudacoes(commands.Cog):
             else:
                 await message.channel.send(f"Já passou das 12h!")
                 return
+            usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(id_discord)
+            if usuario_registrado:
+                usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(id_discord, moedas_ganhas)
+                usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_xp(id_discord, xp_ganho)
+                print(usuario_atualizado)
 
         elif 'boa noite' in conteudo:
+            print(dia_atual)
             if hora_atual >= 18:  # Permite dar boa noite somente depois das 18h
                 boanoite = Manipular_dia.obter_boanoite(message.author.id)
                 if boanoite:
@@ -55,11 +62,11 @@ class MonitorarSaudacoes(commands.Cog):
             else:
                 await message.channel.send(f"Ainda não é noite")
                 return
-        usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(id_discord)
-        if usuario_registrado:
-            usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(id_discord, moedas_ganhas)
-            usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_xp(id_discord, xp_ganho)
-            print(usuario_atualizado)
+            usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(id_discord)
+            if usuario_registrado:
+                usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(id_discord, moedas_ganhas)
+                usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_xp(id_discord, xp_ganho)
+                print(usuario_atualizado)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MonitorarSaudacoes(bot))
