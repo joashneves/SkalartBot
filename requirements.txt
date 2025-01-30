@@ -6,3 +6,4 @@ dpytest
 pre-commit
 sqlalchemy
 audioop-lts
+pytz
