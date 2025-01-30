@@ -6,7 +6,6 @@ from models.Obter_dia import Manipular_dia
 import random
 import pytz
 
-
 class MonitorarSaudacoes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -86,11 +85,6 @@ class MonitorarSaudacoes(commands.Cog):
                     id_discord, xp_ganho
                 )
                 print(usuario_atualizado)
-<<<<<<< HEAD
-
-=======
->>>>>>> a5b1e147e5a72e999deec1d2215ac63188d17df2
-
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MonitorarSaudacoes(bot))
