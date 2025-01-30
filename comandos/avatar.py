@@ -82,6 +82,15 @@ class Avatar(commands.Cog):
 
             if ultimo_avatar and ultimo_avatar.hash_avatar == avatar_hash:
                 avatares = sessao.query(AvatarSalvo).filter_by(id_discord=user_id).all()
+                if not avatares:
+                    await ctx.send("Nenhum avatar salvo encontrado.")
+                    return
+
+                # Verifica se o arquivo existe
+                if not os.path.exists(avatares[0].caminho_arquivo):
+                    await ctx.send("Arquivo de avatar não encontrado.")
+                    return
+
                 embed = discord.Embed(
                     title=f"Avatar de {membro.name}",
                     description=f"Data: {avatares[0].data_arquivo.strftime('%d/%m/%Y')}",
@@ -89,29 +98,33 @@ class Avatar(commands.Cog):
                 embed.set_image(
                     url=f"attachment://{os.path.basename(avatares[0].caminho_arquivo)}"
                 )
-                print(avatares[0].caminho_arquivo)
                 avatar_file = discord.File(avatares[0].caminho_arquivo)
                 view = AvatarView(avatares, membro)
                 await ctx.send(embed=embed, file=avatar_file, view=view)
             else:
-                avatar_path = await save_avatar_locally(avatar_url, user_id)
-                novo_avatar = AvatarSalvo(
-                    id_discord=user_id,
-                    caminho_arquivo=avatar_path,
-                    hash_avatar=avatar_hash,
-                    data_arquivo=datetime.utcnow(),
-                )
-                sessao.add(novo_avatar)
-                sessao.commit()
-                avatares = sessao.query(AvatarSalvo).filter_by(id_discord=user_id).all()
-                embed = discord.Embed(
-                    title=f"Avatar de {membro.name}",
-                    description="Avatar atualizado e salvo com sucesso!",
-                )
-                embed.set_image(url=f"attachment://{os.path.basename(avatar_path)}")
-                avatar_file = discord.File(avatar_path)
-                view = AvatarView(avatares, membro)
-                await ctx.send(embed=embed, file=avatar_file, view=view)
+                try:
+                    avatar_path = await save_avatar_locally(avatar_url, user_id)
+                    novo_avatar = AvatarSalvo(
+                        id_discord=user_id,
+                        caminho_arquivo=avatar_path,
+                        hash_avatar=avatar_hash,
+                        data_arquivo=datetime.utcnow(),
+                    )
+                    sessao.add(novo_avatar)
+                    sessao.commit()
+                    avatares = (
+                        sessao.query(AvatarSalvo).filter_by(id_discord=user_id).all()
+                    )
+                    embed = discord.Embed(
+                        title=f"Avatar de {membro.name}",
+                        description="Avatar atualizado e salvo com sucesso!",
+                    )
+                    embed.set_image(url=f"attachment://{os.path.basename(avatar_path)}")
+                    avatar_file = discord.File(avatar_path)
+                    view = AvatarView(avatares, membro)
+                    await ctx.send(embed=embed, file=avatar_file, view=view)
+                except Exception as e:
+                    await ctx.send(f"Erro ao salvar o avatar: {e}")
 
     @app_commands.command(name="avatar", description="Exibe o avatar de um usuário.")
     @app_commands.describe(membro="O usuário cujo avatar será exibido.")
@@ -133,6 +146,19 @@ class Avatar(commands.Cog):
 
             if ultimo_avatar and ultimo_avatar.hash_avatar == avatar_hash:
                 avatares = sessao.query(AvatarSalvo).filter_by(id_discord=user_id).all()
+                if not avatares:
+                    await interaction.response.send_message(
+                        "Nenhum avatar salvo encontrado.", ephemeral=True
+                    )
+                    return
+
+                # Verifica se o arquivo existe
+                if not os.path.exists(avatares[0].caminho_arquivo):
+                    await interaction.response.send_message(
+                        "Arquivo de avatar não encontrado.", ephemeral=True
+                    )
+                    return
+
                 embed = discord.Embed(
                     title=f"Avatar de {membro.name}",
                     description=f"Data: {avatares[0].data_arquivo.strftime('%d/%m/%Y')}",
@@ -146,26 +172,33 @@ class Avatar(commands.Cog):
                     embed=embed, file=avatar_file, view=view
                 )
             else:
-                avatar_path = await save_avatar_locally(avatar_url, user_id)
-                novo_avatar = AvatarSalvo(
-                    id_discord=user_id,
-                    caminho_arquivo=avatar_path,
-                    hash_avatar=avatar_hash,
-                    data_arquivo=datetime.utcnow(),
-                )
-                sessao.add(novo_avatar)
-                sessao.commit()
-                avatares = sessao.query(AvatarSalvo).filter_by(id_discord=user_id).all()
-                embed = discord.Embed(
-                    title=f"Avatar de {membro.name}",
-                    description="Avatar atualizado e salvo com sucesso!",
-                )
-                embed.set_image(url=f"attachment://{os.path.basename(avatar_path)}")
-                avatar_file = discord.File(avatar_path)
-                view = AvatarView(avatares, membro)
-                await interaction.response.send_message(
-                    embed=embed, file=avatar_file, view=view
-                )
+                try:
+                    avatar_path = await save_avatar_locally(avatar_url, user_id)
+                    novo_avatar = AvatarSalvo(
+                        id_discord=user_id,
+                        caminho_arquivo=avatar_path,
+                        hash_avatar=avatar_hash,
+                        data_arquivo=datetime.utcnow(),
+                    )
+                    sessao.add(novo_avatar)
+                    sessao.commit()
+                    avatares = (
+                        sessao.query(AvatarSalvo).filter_by(id_discord=user_id).all()
+                    )
+                    embed = discord.Embed(
+                        title=f"Avatar de {membro.name}",
+                        description="Avatar atualizado e salvo com sucesso!",
+                    )
+                    embed.set_image(url=f"attachment://{os.path.basename(avatar_path)}")
+                    avatar_file = discord.File(avatar_path)
+                    view = AvatarView(avatares, membro)
+                    await interaction.response.send_message(
+                        embed=embed, file=avatar_file, view=view
+                    )
+                except Exception as e:
+                    await interaction.response.send_message(
+                        f"Erro ao salvar o avatar: {e}", ephemeral=True
+                    )
 
 
 async def setup(bot):
