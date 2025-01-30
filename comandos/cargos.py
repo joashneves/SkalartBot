@@ -3,12 +3,13 @@ from discord.ext import commands
 from discord import app_commands
 from models import Obter_cargo
 
+
 class Cargos(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @app_commands.command(
-        name="adicionar_cargo",
+        name="configurar_cargo",
         description="Adiciona um cargo à lista de cargos a serem atribuídos automaticamente.",
     )
     @app_commands.default_permissions(manage_guild=True)
@@ -66,7 +67,9 @@ class Cargos(commands.Cog):
         description="Remove um cargo da lista de cargos salvos.",
     )
     @app_commands.default_permissions(manage_guild=True)
-    async def remover_cargo(self, interaction: discord.Interaction, cargo: discord.Role):
+    async def remover_cargo(
+        self, interaction: discord.Interaction, cargo: discord.Role
+    ):
         id_guild = str(interaction.guild_id)
         id_cargo = str(cargo.id)
 
