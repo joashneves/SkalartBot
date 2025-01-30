@@ -38,6 +38,11 @@ class MonitorarSaudacoes(commands.Cog):
             else:
                 await message.channel.send(f"Já passou das 12h!")
                 return
+            usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(id_discord)
+            if usuario_registrado:
+                usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(id_discord, moedas_ganhas)
+                usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_xp(id_discord, xp_ganho)
+                print(usuario_atualizado)
 
         elif 'boa noite' in conteudo:
             if hora_atual >= 18:  # Permite dar boa noite somente depois das 18h
@@ -55,11 +60,12 @@ class MonitorarSaudacoes(commands.Cog):
             else:
                 await message.channel.send(f"Ainda não é noite")
                 return
-        usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(id_discord)
-        if usuario_registrado:
-            usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(id_discord, moedas_ganhas)
-            usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_xp(id_discord, xp_ganho)
-            print(usuario_atualizado)
+            usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(id_discord)
+            if usuario_registrado:
+                usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(id_discord, moedas_ganhas)
+                usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_xp(id_discord, xp_ganho)
+                print(usuario_atualizado)
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(MonitorarSaudacoes(bot))
