@@ -3,17 +3,46 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ui import Select, View
 
+
 class AjudaSelect(Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="Sobre o Bot", description="Informações gerais sobre o bot.", emoji="🤖"),
-            discord.SelectOption(label="Comandos Gerais", description="Comandos disponíveis para todos.", emoji="📜"),
-            discord.SelectOption(label="Comandos de Perfil", description="Comandos relacionados a perfis.", emoji="👤"),
-            discord.SelectOption(label="Comandos de Imagens", description="Comandos relacionados a imagens.", emoji="🖼️"),
-            discord.SelectOption(label="Comandos de Moderação", description="Comandos para administradores.", emoji="🛠️"),
-            discord.SelectOption(label="Cargos", description="Sobre o sistema de cargos automáticos.", emoji="🎖️"),
-            discord.SelectOption(label="Feed", description="Sobre o sistema de feed.", emoji="📢"),
-            discord.SelectOption(label="Links", description="Convite e repositório do bot.", emoji="🔗"),
+            discord.SelectOption(
+                label="Sobre o Bot",
+                description="Informações gerais sobre o bot.",
+                emoji="🤖",
+            ),
+            discord.SelectOption(
+                label="Comandos Gerais",
+                description="Comandos disponíveis para todos.",
+                emoji="📜",
+            ),
+            discord.SelectOption(
+                label="Comandos de Perfil",
+                description="Comandos relacionados a perfis.",
+                emoji="👤",
+            ),
+            discord.SelectOption(
+                label="Comandos de Imagens",
+                description="Comandos relacionados a imagens.",
+                emoji="🖼️",
+            ),
+            discord.SelectOption(
+                label="Comandos de Moderação",
+                description="Comandos para administradores.",
+                emoji="🛠️",
+            ),
+            discord.SelectOption(
+                label="Cargos",
+                description="Sobre o sistema de cargos automáticos.",
+                emoji="🎖️",
+            ),
+            discord.SelectOption(
+                label="Feed", description="Sobre o sistema de feed.", emoji="📢"
+            ),
+            discord.SelectOption(
+                label="Links", description="Convite e repositório do bot.", emoji="🔗"
+            ),
         ]
         super().__init__(placeholder="Escolha uma opção...", options=options)
 
@@ -91,24 +120,25 @@ class AjudaSelect(Select):
                 "🔗 **Links:**\n"
                 "- [Convite para o servidor da Skalart](https://discord.gg/h7mP7aZuY4)\n"
                 "- [Repositório do código no GitHub](https://github.com/joashneves/SkalartBot)\n"
+                "- [Clique aqui para colocar no seu servidor](https://discord.com/oauth2/authorize?client_id=1025176642236203118&scope=bot&permissions=8)\n"
             )
 
         await interaction.response.edit_message(embed=embed)
+
 
 class Ajuda(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @app_commands.command(
-        name="ajuda",
-        description="Mostra informações sobre o bot e seus comandos."
+        name="ajuda", description="Mostra informações sobre o bot e seus comandos."
     )
     async def ajuda(self, interaction: discord.Interaction):
         # Cria o embed inicial
         embed = discord.Embed(
             title="Ajuda da Skalart",
             description="Escolha uma opção no menu abaixo para ver mais informações sobre o bot.",
-            color=discord.Color.blue()
+            color=discord.Color.blue(),
         )
 
         # Cria a view com o menu de seleção
@@ -117,6 +147,7 @@ class Ajuda(commands.Cog):
 
         # Envia a mensagem com o embed e o menu
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(Ajuda(bot))
