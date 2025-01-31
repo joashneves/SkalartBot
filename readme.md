@@ -48,3 +48,10 @@ As issues são as tarefas a serem feitas e estão organizadas dentro de mileston
 # O objetivo
 
 O objetivo deste projeto é desenvolver um bot de Discord em conjunto, enquanto se aprimora o uso do GitHub para colaboração e controle de versões.
+
+# o objetivo do bot
+A existencia do bot vem ao caso de torna o discord uma rede mais que ela ja é, com funcionalidades que tentam tornar o servidor de quem o adicinou unico e com sua propria cara, para diferenciar dos demais.
+
+Caso voce queria adicionar o bot atualmente online [Clique aqui](https://discord.com/oauth2/authorize?client_id=1025176642236203118&scope=bot&permissions=8)
+> OBS: O bot tera administrador!
+Caso queria testar o bot no nosso [Servidor](https://discord.gg/h7mP7aZuY4)
