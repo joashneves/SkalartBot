@@ -7,6 +7,40 @@ from models.Obter_imagem import Manipular_Imagem
 from models.Obter_Feed import Manipular_Feed
 from dotenv import load_dotenv
 import random
+import aiohttp
+import hashlib
+from datetime import datetime
+
+# Diretório para salvar as imagens
+IMAGENS_DIR = "imagens_usuarios"
+os.makedirs(IMAGENS_DIR, exist_ok=True)
+
+
+async def salvar_imagem_localmente(url: str, user_id: str) -> str:
+    """
+    Salva uma imagem localmente e retorna o caminho do arquivo.
+    :param url: URL da imagem.
+    :param user_id: ID do usuário que enviou a imagem.
+    :return: Caminho do arquivo salvo.
+    """
+    # Gera um nome único para o arquivo
+    nome_arquivo = f"{user_id}_{hashlib.md5(url.encode()).hexdigest()}.png"
+    caminho_arquivo = os.path.join(IMAGENS_DIR, nome_arquivo)
+
+    # Verifica se o arquivo já existe
+    if os.path.exists(caminho_arquivo):
+        return caminho_arquivo
+
+    # Baixa a imagem e salva localmente
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                with open(caminho_arquivo, "wb") as f:
+                    f.write(await response.read())
+                return caminho_arquivo
+            else:
+                raise Exception(f"Erro ao baixar imagem: status {response.status}")
+
 
 load_dotenv()  # Carregar as variáveis do .env
 ID_USER_MASTER = int(os.getenv("ID_USER_MASTER"))  # Pegar o ID do User Master
@@ -104,23 +138,36 @@ class AdicionarImagem(commands.Cog):
                 ephemeral=True,
             )
             return
-        # Salva o caminho da imagem (URL do Discord)
-        caminho_arquivo = imagem.url
+        # Salva a imagem localmente
+        try:
+            caminho_arquivo = await salvar_imagem_localmente(imagem.url, id_discord)
+        except Exception as e:
+            await interaction.response.send_message(
+                f"Erro ao salvar a imagem: {e}", ephemeral=True
+            )
+            return
 
         # Gera moedas e xp aleatórios
         moedas_ganhas = random.randint(10, 50)  # Gera entre 10 e 50 moedas
-        xp_ganho = random.randint(1, 5)  # Gera entre 1 e 3 xp
+        xp_ganho = random.randint(1, 5)  # Gera entre 1 e 5 xp
 
-        # Salva o caminho da imagem (URL do Discord)
-        caminho_arquivo = imagem.url
-        # Adiciona a imagem ao banco
-        print(id_discord, caminho_arquivo, descricao)
+        # Adiciona a imagem ao banco de dados
         sucesso = Manipular_Imagem.criar_Imagem(id_discord, caminho_arquivo, descricao)
-        print(sucesso)
         if sucesso:
-            await interaction.response.send_message(
-                f"Imagem adicionada com sucesso!\n **Descrição:** {descricao}\n [Clique para ver a imagem]({caminho_arquivo})"
+            embed = discord.Embed(
+                title="🖼️ Nova Imagem Enviada!",
+                description=f"**Descrição:** {descricao}",
+                color=discord.Color.blue(),
             )
+            embed.set_image(url=f"attachment://{os.path.basename(caminho_arquivo)}")
+            embed.set_footer(
+                text=f"Enviado por: {interaction.user.name}",
+                icon_url=interaction.user.display_avatar.url,
+            )
+
+            await interaction.response.send_message(f"Imagem adicionada com sucesso!")
+
+            # Adiciona moedas e XP ao usuário
             usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(
                 id_discord, moedas_ganhas
             )
@@ -128,37 +175,31 @@ class AdicionarImagem(commands.Cog):
                 id_discord, xp_ganho
             )
             if not usuario_atualizado:
-                await interaction.response.send_message(
-                    "Erro ao adicionar moedas ou moedas. Tente novamente.",
+                await interaction.followup.send(
+                    "Erro ao adicionar moedas ou XP. Tente novamente.",
                     ephemeral=True,
                 )
                 return
-            # Agora, obtemos todos os canais registrados para a guilda
+
+            # Envia a imagem para os canais de feed configurados
             canais_configurados = Manipular_Feed.obter_chat()
-            print(f"Canais configurados: {canais_configurados}")
-
             if canais_configurados:
-                # Envia a mensagem para todos os canais registrados
                 for canal in canais_configurados:
-                    # Obtém o canal pelo ID
-                    print(
-                        f"Canal ID: {canal.id}, Guild ID: {canal.guild_id}, Channel ID: {canal.channel_id}"
-                    )
                     channel = interaction.client.get_channel(int(canal.channel_id))
-
-                    print(channel)
-                    if channel is not None and isinstance(channel, discord.TextChannel):
-
-                        # Verifica se o usuário é membro do servidor
-                        if interaction.guild.get_member(int(id_discord)):
-                            try:
-                                await channel.send(
-                                    f"Nova imagem enviada por {interaction.user.mention}!\n**Descrição:** {descricao}\n[Veja a imagem aqui]({caminho_arquivo})"
-                                )
-                            except discord.DiscordException as e:
-                                print(
-                                    f"Erro ao enviar mensagem para o canal {channel.name}: {e}"
-                                )
+                    if isinstance(channel, discord.TextChannel):
+                        try:
+                            await channel.send(
+                                embed=embed, file=discord.File(caminho_arquivo)
+                            )
+                        except discord.DiscordException as e:
+                            print(
+                                f"Erro ao enviar mensagem para o canal {channel.name}: {e}"
+                            )
+        else:
+            await interaction.response.send_message(
+                "Ocorreu um erro ao salvar a imagem. Tente novamente.",
+                ephemeral=True,
+            )
 
     @app_commands.command(
         name="imagem_aleatoria",
@@ -168,22 +209,22 @@ class AdicionarImagem(commands.Cog):
         imagem = Manipular_Imagem.obter_imagem_aleatoria()
 
         if imagem:
-            usuario = await self.bot.fetch_user(
-                int(imagem.id_discord)
-            )  # Obtém o usuário do Discord
-
+            usuario = await self.bot.fetch_user(int(imagem.id_discord))
             embed = discord.Embed(
                 title="🖼️ Imagem Aleatória",
                 description=f"**Descrição:** {imagem.descricao}",
                 color=discord.Color.blue(),
             )
-            embed.set_image(url=imagem.caminho_arquivo)
-
+            embed.set_image(
+                url=f"attachment://{os.path.basename(imagem.caminho_arquivo)}"
+            )
             embed.set_footer(
                 text=f"Enviado por: {usuario.name}", icon_url=usuario.display_avatar.url
             )
-
-            await interaction.response.send_message(embed=embed)
+            # Envia a imagem como um arquivo
+            await interaction.response.send_message(
+                embed=embed, file=discord.File(imagem.caminho_arquivo)
+            )
         else:
             await interaction.response.send_message(
                 "Nenhuma imagem encontrada no banco de dados!", ephemeral=True
@@ -215,11 +256,10 @@ class AdicionarImagem(commands.Cog):
     async def minhas_imagens(self, interaction: discord.Interaction):
         id_discord = str(interaction.user.id)
         imagens = Manipular_Imagem.listar_imagens_usuario(id_discord)
-        print(imagens)
 
         if not imagens:
             await interaction.response.send_message(
-                " Você ainda não enviou nenhuma imagem.", ephemeral=True
+                "Você ainda não enviou nenhuma imagem.", ephemeral=True
             )
             return
 
