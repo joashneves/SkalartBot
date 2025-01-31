@@ -43,6 +43,11 @@ class AjudaSelect(Select):
             discord.SelectOption(
                 label="Links", description="Convite e repositório do bot.", emoji="🔗"
             ),
+            discord.SelectOption(  # Nova opção para comandos de ticket
+                label="Comandos de Ticket",
+                description="Comandos relacionados ao sistema de tickets.",
+                emoji="🎫",
+            ),
         ]
         super().__init__(placeholder="Escolha uma opção...", options=options)
 
@@ -121,6 +126,22 @@ class AjudaSelect(Select):
                 "- [Convite para o servidor da Skalart](https://discord.gg/h7mP7aZuY4)\n"
                 "- [Repositório do código no GitHub](https://github.com/joashneves/SkalartBot)\n"
                 "- [Clique aqui para colocar no seu servidor](https://discord.com/oauth2/authorize?client_id=1025176642236203118&scope=bot&permissions=8)\n"
+            )
+        elif escolha == "Comandos de Ticket":  # Nova seção para comandos de ticket
+            embed.description = (
+                "🎫 **Comandos de Ticket:**\n"
+                "O sistema de tickets da Skalart permite que os usuários abram tickets para suporte ou questões específicas.\n\n"
+                "**Comandos disponíveis:**\n"
+                "- `/enviar_ticket`: Abre um novo ticket para suporte.\n"
+                "- `/apagar_ticket`: Fecha o ticket atual (apenas para criadores do ticket ou administradores).\n"
+                "- `/configurar_ticket`: Configura a categoria e o cargo para gerenciar tickets (apenas para administradores).\n"
+                "- `/remover_config_ticket`: Remove a configuração de ticket do servidor (apenas para administradores).\n"
+                "- `/ver_config_ticket`: Mostra a configuração atual de ticket do servidor (apenas para administradores).\n\n"
+                "**Como funciona:**\n"
+                "- Os usuários podem abrir tickets usando `/enviar_ticket`.\n"
+                "- Os tickets são criados em uma categoria específica, configurada pelos administradores.\n"
+                "- Apenas o criador do ticket e os administradores podem visualizar e interagir com o ticket.\n"
+                "- Os tickets podem ser fechados com `/apagar_ticket`.\n"
             )
 
         await interaction.response.edit_message(embed=embed)
