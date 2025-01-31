@@ -71,4 +71,12 @@ class FeedConfig(Base):
     channel_id = Column(String, nullable=False, index=True)
 
 
+class TicketConfig(Base):
+    __tablename__ = "ticket_Config"
+    id = Column(Integer, primary_key=True, index=True)
+    guild_id = Column(String, nullable=True)
+    categoria_id = Column(String, nullable=True)
+    cargo_id = Column(String, nullable=True)
+
+
 Base.metadata.create_all(engine)
