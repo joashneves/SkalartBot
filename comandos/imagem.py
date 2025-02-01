@@ -165,7 +165,9 @@ class AdicionarImagem(commands.Cog):
                 icon_url=interaction.user.display_avatar.url,
             )
 
-            await interaction.response.send_message(f"Imagem adicionada com sucesso!")
+            await interaction.response.send_message(
+                f"Imagem adicionada com sucesso!", ephemeral=True
+            )
 
             # Adiciona moedas e XP ao usuário
             usuario_atualizado = Obter_Usuario.Manipular_Usuario.adicionar_moedas(
