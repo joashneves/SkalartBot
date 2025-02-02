@@ -76,3 +76,8 @@ engine = create_engine("sqlite:///dados.db")
 Base = declarative_base()
 _Sessao = sessionmaker(engine)
 ```
+
+# Estrutura
+
+- Models
+- Comandos
