@@ -1,4 +1,18 @@
-# Comando para baixar as dependências e iniciar o bot
+# Introdução
+
+- Guia
+   - [Guia](#Guia)
+   - [Clonando](#clonando)
+   - [Objetivo](#objetivo)
+
+# Guia
+
+Esse é o começo do bot, sua explicação, seu funcionamento, comandos e como foi construido.
+
+- [Comandos](./docs/comandos.md)
+
+# Clonando
+## Comando para baixar as dependências e iniciar o bot
 
 ### Ao clonar o repositório com Python já instalado
 
@@ -14,7 +28,7 @@
 
 ---
 
-# Pré-commit Hook
+## Pré-commit Hook
 
 Para garantir que o código esteja formatado corretamente e sem erros de estilo, é recomendado usar o **pre-commit**. Isso ajuda a automatizar o processo de formatação e linting.
 
@@ -45,7 +59,7 @@ As issues são as tarefas a serem feitas e estão organizadas dentro de mileston
 
 ---
 
-# O objetivo
+# objetivo
 
 O objetivo deste projeto é desenvolver um bot de Discord em conjunto, enquanto se aprimora o uso do GitHub para colaboração e controle de versões.
 
