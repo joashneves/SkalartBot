@@ -32,6 +32,11 @@ class AjudaSelect(Select):
                 description="Comandos para administradores.",
                 emoji="🛠️",
             ),
+            discord.SelectOption(  # Nova opção para comandos de ticket
+                label="Comandos de Ticket",
+                description="Comandos relacionados ao sistema de tickets.",
+                emoji="🎫",
+            ),
             discord.SelectOption(
                 label="Cargos",
                 description="Sobre o sistema de cargos automáticos.",
@@ -42,11 +47,6 @@ class AjudaSelect(Select):
             ),
             discord.SelectOption(
                 label="Links", description="Convite e repositório do bot.", emoji="🔗"
-            ),
-            discord.SelectOption(  # Nova opção para comandos de ticket
-                label="Comandos de Ticket",
-                description="Comandos relacionados ao sistema de tickets.",
-                emoji="🎫",
             ),
         ]
         super().__init__(placeholder="Escolha uma opção...", options=options)
