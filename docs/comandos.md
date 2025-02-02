@@ -50,7 +50,7 @@ Mostrar o perfil seu ou da pessoa mencionada, assim como todas as imagens que a 
 ## /imagem_aleatoria
 
 o `/imagem_aleatoria` te retonar uma imagem aleatoria que esta salva no banco de dados do bot
-> Se quiser saber mais [Clique aqui](./social-bot.md)
+> Se quiser saber mais [Clique aqui](./extras.md)
 
 ## /enviar_ticket
 
@@ -65,6 +65,7 @@ Exiber uma lista dos usuarios que estão registrados no sistema do bot
 
 ## / adicionar_imagem
 > Requer : [imagem] e [descrição]
+
 Para enviar uma imagem, voce apenas precisa escrever o comando, e anexar um arquivo de imagem, e uma descrição para ela enviar em todos os chats que estão configurados como `feed` nos servidores que ela esta
 
 ## / minhas_imagens
@@ -72,6 +73,7 @@ Esse comando vai te retonar uma lista de todas as imagens que voce ja enviou
 
 ## / remover_imagem
 > Requer : [imagem_id]
+
 Para remover uma imagem que voce enviou voce precisa digitar o comando /remover_imagem, e enviar o id da imagen que voce quer remover
 > Voce pode conseguir o id com o comando `/minhas_imagens`
 
@@ -80,6 +82,7 @@ Esses comandos podem ser executados somente pela administração do servidor
 
 ## / configurar_cargo
 > Requer : [cargo]
+
 Voce pode colocar um cargo que voce deseja que pessoa tenha OU *VARIOS CARGOS PARA DESCIDIR ALEATORIAMENTE*
 #### Exemplo
 Voce colocar 3 cargos no bot : `time_1` / `time_2` / `time_3`
@@ -90,10 +93,12 @@ Lista todos os cargos configurados
 
 # / remover_cargo
 > Requer : [cargo]
+
  Remove um cargo da lista de cargos
 
 # /configurar_chat
 > Requer : [Chat]
+
 Configura um canal para reagir com emojis em mensagens de imagens, quando voce mandar uma mensagem no canal especificado ele não faz nada, mas se for uma imagem ele reage com os emoticons
 ### Exemplo
 ![reacoes](./img/reacaoes.png)
@@ -103,10 +108,12 @@ Lista todos os canais configurados para reações
 
 # /remover_chat
 > Requer : [Chat]
+
 Remove um canal da lista de reações
 
 # /configurar_feed
 > Requer : [Chat]
+
 Configura um canal para que quando voce envie uma imagem, todos os servidores que possuem esse feed nele possam receber a imagem do comando [/adicionar_imagem](#-adicionar_imagem)
 ### Exemplo
 ![reacoes](./img/imagem-exemplofeed.png)
@@ -116,4 +123,5 @@ Lista todos os canais configurados para feeds
 
 # /remover_feeds
 > Requer : [Chat]
+
 Remove um canal da lista de feeds
