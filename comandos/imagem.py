@@ -48,7 +48,7 @@ ID_USER_MASTER = int(os.getenv("ID_USER_MASTER"))  # Pegar o ID do User Master
 
 class ImagemView(discord.ui.View):
     def __init__(self, imagens, user_id):
-        super().__init__(timeout=120)  # Tempo limite de interação
+        super().__init__(timeout=None)  # Tempo limite de interação
         self.imagens = imagens
         self.user_id = user_id
         self.chunk_size = 10  # Número de imagens por página
@@ -66,7 +66,7 @@ class ImagemView(discord.ui.View):
         imagens_chunk = self.pages[self.current_page]
         lista_imagens = "\n".join(
             [
-                f"**ID:** {img.id} | **Descrição:** {img.descricao} | [Ver imagem]({img.caminho_arquivo})"
+                f"**ID:** {img.id} | **Descrição:** {img.descricao})"
                 for img in imagens_chunk
             ]
         )
