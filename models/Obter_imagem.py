@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from models.db import _Sessao, ImagemGuarda
+import os
 import random
 
 class Manipular_Imagem:
@@ -32,6 +33,7 @@ class Manipular_Imagem:
         with _Sessao() as sessao:
             imagem = sessao.query(ImagemGuarda).filter_by(id=imagem_id, id_discord=id_discord).first()
             if imagem:
+                os.remove(imagem.caminho_arquivo)
                 sessao.delete(imagem)
                 sessao.commit()
                 return True
