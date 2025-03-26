@@ -31,10 +31,12 @@ async def carrega_imagem(url) -> str:
                 raise Exception(f"Erro ao baixar imagem: status {response.status}")
 
 class PersonagensView(discord.ui.View):
-    def __init__(self, id, name,  timeout = None):
+    def __init__(self, id, name, gender, franquia, timeout = None):
         super().__init__(timeout=timeout)
         self.id = id
         self.name = name
+        self.gender = gender
+        self.franquia = franquia
         self.caminho = None
 
     async def get_embed(self):
@@ -42,7 +44,7 @@ class PersonagensView(discord.ui.View):
 
         embed = discord.Embed(
             title=f"Personagem: {self.name}",
-            description="Franquia: ",
+            description=f"Franquia: {self.franquia} \n Genero: {self.gender}",
             color=discord.Color.blue(),
         )
         embed.set_image(url=f"attachment://image.jpg")
@@ -77,8 +79,8 @@ class Game(commands.Cog):
     async def req(self, ctx):
         req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
         content = json.loads(req.content)
-        print(content["id"])
-        view = PersonagensView(content["id"], content["name"])
+        print(content["franquia"]["name"])
+        view = PersonagensView(content["id"], content["name"], content["gender"], content["franquia"]["name"])
         embed = await view.get_embed()
         imagem = await view.imagem()
         await ctx.send(embed=embed, file=imagem)
