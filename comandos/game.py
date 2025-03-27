@@ -102,6 +102,9 @@ class Game(commands.Cog):
                 if message.content.lower() == self.mensagem[3].lower():
                     await message.channel.send("Voce acertou!")
                     self.mensagem = []
+                elif self.mensagem[5] <= 0:
+                    await message.channel.send(f"Voce perdeu")
+                    self.mensagem = []
                 else:
                     self.mensagem[6] = self.mensagem[6] - 1
                     await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[6]} tentativas")
