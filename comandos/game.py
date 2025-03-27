@@ -6,7 +6,7 @@ import json
 import aiohttp
 import hashlib
 import os
-import time
+import asyncio
 
 IMAGENS_DIR = "imagens_temp"
 os.makedirs(IMAGENS_DIR, exist_ok=True)
@@ -109,6 +109,10 @@ class Game(commands.Cog):
             print(res)
             self.mensagem = [ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5]
             print(self.mensagem)
+            await asyncio.sleep(30)
+            if self.mensagem:
+                self.mensagem = []
+                await ctx.send("o jogo acabou!")
         else:
             await ctx.send("um jogo ja esta em andamento")
 
@@ -117,7 +121,6 @@ class Game(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             em = discord.Embed(title=f"command is on cooldown",description=f"Try again in {error.retry_after:.2f}s.", color=0xFFFF00)
             await ctx.send(embed=em)
-
 
 async def setup(bot):
     await bot.add_cog(Game(bot))
