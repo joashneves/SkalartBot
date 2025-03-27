@@ -110,19 +110,21 @@ class Game(commands.Cog):
                         await message.channel.send(f"Voce perdeu")
                         self.mensagem[message.channel.id] = []
                     else:
-                        if self.mensagem[message.channel.id][6] == 5:
-                            await asyncio.sleep(30)
-                            self.mensagem[message.channel.id] = []
-                            await message.channel.send("o jogo acabou!")
                         self.mensagem[message.channel.id][6] = self.mensagem[message.channel.id][6] - 1
                         await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[message.channel.id][6]} tentativas")
-
                     print(self.mensagem[message.channel.id])
                     vezes_jogada = await quantidades_de_vezes_jogadas( message.author.id)
                     
                 else:
                     print(f"ID : {message.author.id} Pessoa não é {self.mensagem[message.channel.id][5]} ou/e não esta no canal certo")
 
+    async def temporizador(self, msg, channel_id, id_mensagem):
+        if id_mensagem in self.mensagem[channel_id]:
+            await asyncio.sleep(12)
+            self.mensagem[channel_id] = []
+            await msg.send("acabou o jogo")
+
+        
     @commands.command()
     async def jogar(self, ctx):
         id_player = ctx.author.id
@@ -146,6 +148,7 @@ class Game(commands.Cog):
                 print(f" VAR : Numenro de tentativas {NUM_JOGADAS}")
                 await ctx.send(f"carregando a imagem, aguarde... voce tem {NUM_JOGADAS[id_player][1]} jogadas")
                 req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
+                print(req)
                 content = json.loads(req.content)
                 print(content["franquia"]["name"])
                 view = PersonagensView(content["id"], content["name"], content["gender"], content["franquia"]["name"])
@@ -156,6 +159,8 @@ class Game(commands.Cog):
                 res = await view.deletar_arquivo()
                 print(res)
                 self.mensagem[msg.channel.id] = ([ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5])
+                if msg.channel.id in self.mensagem:
+                    await self.temporizador(ctx, msg.channel.id, msg.id)
                 print(f"VAR : nova self.mensagem = {self.mensagem}")
         else:
             await ctx.send("um jogo ja esta em andamento", ephemeral=True)
