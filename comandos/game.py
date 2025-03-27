@@ -110,18 +110,28 @@ class Game(commands.Cog):
                         await message.channel.send(f"Voce perdeu")
                         self.mensagem[message.channel.id] = []
                     else:
+                        if self.mensagem[message.channel.id][6] == 5:
+                            await asyncio.sleep(30)
+                            self.mensagem[message.channel.id] = []
+                            await message.channel.send("o jogo acabou!")
                         self.mensagem[message.channel.id][6] = self.mensagem[message.channel.id][6] - 1
                         await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[message.channel.id][6]} tentativas")
+
                     print(self.mensagem[message.channel.id])
                     vezes_jogada = await quantidades_de_vezes_jogadas( message.author.id)
+                    
                 else:
                     print(f"ID : {message.author.id} Pessoa não é {self.mensagem[message.channel.id][5]} ou/e não esta no canal certo")
 
     @commands.command()
     async def jogar(self, ctx):
         id_player = ctx.author.id
-        if ctx.channel.id in self.mensagem and id_player in self.mensagem[ctx.channel.id]:
-            ctx.send("Alguem ja esta jogando")
+        if id_player in NUM_JOGADAS and NUM_JOGADAS[id_player][1] <= 0:
+            await ctx.send("Quantidade de adivinhação vencida tente novamenteo mais tarde", ephemeral=True)
+            return
+
+        if ctx.channel.id in self.mensagem and self.mensagem[ctx.channel.id] != []:
+            await ctx.send("Alguem ja esta jogando", ephemeral=True)
             return
         
         if not ctx.channel.id in self.mensagem or self.mensagem[ctx.channel.id] == []:
@@ -133,7 +143,8 @@ class Game(commands.Cog):
 
 
             if NUM_JOGADAS[ctx.author.id][1] > 0:
-                print(NUM_JOGADAS)
+                print(f" VAR : Numenro de tentativas {NUM_JOGADAS}")
+                await ctx.send(f"carregando a imagem, aguarde... voce tem {NUM_JOGADAS[id_player][1]} jogadas")
                 req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
                 content = json.loads(req.content)
                 print(content["franquia"]["name"])
@@ -146,12 +157,8 @@ class Game(commands.Cog):
                 print(res)
                 self.mensagem[msg.channel.id] = ([ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5])
                 print(f"VAR : nova self.mensagem = {self.mensagem}")
-                await asyncio.sleep(30)
-                if self.mensagem:
-                    self.mensagem[msg.channel.id] = []
-                    await ctx.send("o jogo acabou!")
         else:
-            await ctx.send("um jogo ja esta em andamento")
+            await ctx.send("um jogo ja esta em andamento", ephemeral=True)
 
     @jogar.error
     async def command_error(ctx, error):
