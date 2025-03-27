@@ -6,6 +6,7 @@ import json
 import aiohttp
 import hashlib
 import os
+import time
 
 IMAGENS_DIR = "imagens_temp"
 os.makedirs(IMAGENS_DIR, exist_ok=True)
@@ -73,19 +74,49 @@ class PersonagensView(discord.ui.View):
 class Game(commands.Cog):
     def __init__(self, bot: commands.bot):
         self.bot = bot
+        self.mensagem = []
 
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+        if self.mensagem:
+            if self.mensagem[5] == message.author.id and self.mensagem[1] == message.channel.id:
+                if message.content.lower() == self.mensagem[3].lower():
+                    await message.channel.send("Voce acertou!")
+                    self.mensagem = []
+                else:
+                    self.mensagem[6] = self.mensagem[6] - 1
+                    await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[6]} tentativas")
+                if self.mensagem[6] <= 0 or self.mensagem[4] == False:
+                    self.mensagem = []
+                print(self.mensagem)
+            else:
+                print(f"{message.author.id}Pessoa não é {self.mensagem[5]} ou/e não esta no canal certo")
 
     @commands.command()
-    async def req(self, ctx):
-        req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
-        content = json.loads(req.content)
-        print(content["franquia"]["name"])
-        view = PersonagensView(content["id"], content["name"], content["gender"], content["franquia"]["name"])
-        embed = await view.get_embed()
-        imagem = await view.imagem()
-        await ctx.send(embed=embed, file=imagem)
-        res = await view.deletar_arquivo()
-        print(res)
+    async def jogar(self, ctx):
+        if not self.mensagem:
+            req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
+            content = json.loads(req.content)
+            print(content["franquia"]["name"])
+            view = PersonagensView(content["id"], content["name"], content["gender"], content["franquia"]["name"])
+            embed = await view.get_embed()
+            imagem = await view.imagem()
+            msg = await ctx.send(embed=embed, file=imagem)
+            print("mensaem", msg)
+            res = await view.deletar_arquivo()
+            print(res)
+            self.mensagem = [ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5]
+            print(self.mensagem)
+        else:
+            await ctx.send("um jogo ja esta em andamento")
+
+    @jogar.error
+    async def command_error(ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            em = discord.Embed(title=f"command is on cooldown",description=f"Try again in {error.retry_after:.2f}s.", color=0xFFFF00)
+            await ctx.send(embed=em)
 
 
 async def setup(bot):
