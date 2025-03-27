@@ -91,37 +91,47 @@ class PersonagensView(discord.ui.View):
 class Game(commands.Cog):
     def __init__(self, bot: commands.bot):
         self.bot = bot
-        self.mensagem = []
+        self.mensagem = {}
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
-        if self.mensagem:
-            if self.mensagem[5] == message.author.id and self.mensagem[1] == message.channel.id:
-                if message.content.lower() == self.mensagem[3].lower():
-                    await message.channel.send("Voce acertou!")
-                    self.mensagem = []
-                elif self.mensagem[5] <= 0:
-                    await message.channel.send(f"Voce perdeu")
-                    self.mensagem = []
+
+        if message.channel.id in self.mensagem:
+            print(f"VAR : menssagem guild id {message.channel.id}")
+            print(f"VAR : self.mensagem[id] : {self.mensagem[message.channel.id]}")
+            if  self.mensagem[message.channel.id] != []:
+                if self.mensagem[message.channel.id][5] == message.author.id and self.mensagem[message.channel.id][1] == message.channel.id:
+                    if message.content.lower() == self.mensagem[message.channel.id][3].lower():
+                        await message.channel.send("Voce acertou!")
+                        self.mensagem[message.channel.id] = []
+                    elif self.mensagem[message.channel.id][6] <= 0:
+                        await message.channel.send(f"Voce perdeu")
+                        self.mensagem[message.channel.id] = []
+                    else:
+                        self.mensagem[message.channel.id][6] = self.mensagem[message.channel.id][6] - 1
+                        await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[message.channel.id][6]} tentativas")
+                    print(self.mensagem[message.channel.id])
+                    vezes_jogada = await quantidades_de_vezes_jogadas( message.author.id)
                 else:
-                    self.mensagem[6] = self.mensagem[6] - 1
-                    await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[6]} tentativas")
-                print(self.mensagem)
-                vezes_jogada = await quantidades_de_vezes_jogadas( message.author.id)
-            else:
-                print(f"{message.author.id}Pessoa não é {self.mensagem[5]} ou/e não esta no canal certo")
+                    print(f"ID : {message.author.id} Pessoa não é {self.mensagem[message.channel.id][5]} ou/e não esta no canal certo")
 
     @commands.command()
     async def jogar(self, ctx):
         id_player = ctx.author.id
-        if not self.mensagem:
+        if ctx.channel.id in self.mensagem and id_player in self.mensagem[ctx.channel.id]:
+            ctx.send("Alguem ja esta jogando")
+            return
+        
+        if not ctx.channel.id in self.mensagem or self.mensagem[ctx.channel.id] == []:
             if not NUM_JOGADAS:
                  NUM_JOGADAS[id_player] = ([id_player, 10, False])
 
             if not id_player in NUM_JOGADAS:
                 NUM_JOGADAS[id_player] = ([id_player, 10, False])
+
+
             if NUM_JOGADAS[ctx.author.id][1] > 0:
                 print(NUM_JOGADAS)
                 req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
@@ -134,13 +144,12 @@ class Game(commands.Cog):
                 print("mensagem : ", msg)
                 res = await view.deletar_arquivo()
                 print(res)
-                self.mensagem = [ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5]
-                print(self.mensagem)
+                self.mensagem[msg.channel.id] = ([ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5])
+                print(f"VAR : nova self.mensagem = {self.mensagem}")
                 await asyncio.sleep(30)
                 if self.mensagem:
-                    self.mensagem = []
+                    self.mensagem[msg.channel.id] = []
                     await ctx.send("o jogo acabou!")
-
         else:
             await ctx.send("um jogo ja esta em andamento")
 
