@@ -10,6 +10,24 @@ import asyncio
 
 IMAGENS_DIR = "imagens_temp"
 os.makedirs(IMAGENS_DIR, exist_ok=True)
+NUM_JOGADAS = {}
+
+async def quantidades_de_vezes_jogadas(id_player):
+    if not NUM_JOGADAS:
+            NUM_JOGADAS[id_player] = ([id_player, 10, False])
+    else:
+        if id_player in NUM_JOGADAS:
+            if NUM_JOGADAS[id_player][0] == id_player:
+                NUM_JOGADAS[id_player][1] = NUM_JOGADAS[id_player][1] - 1
+            if NUM_JOGADAS[id_player][1] != 0 and NUM_JOGADAS[id_player][2] == False:
+                NUM_JOGADAS[id_player][2] = True
+                await asyncio.sleep(60*32)
+                print(f"resetou : ", id_player)
+                NUM_JOGADAS[id_player] = ([id_player, 10, False])
+        else:
+            NUM_JOGADAS[id_player] = ([id_player, 10, False])
+    return NUM_JOGADAS[id_player]
+
 
 async def carrega_imagem(url) -> str:
     """
@@ -70,7 +88,6 @@ class PersonagensView(discord.ui.View):
             return "erro ao apagar arquivo"
 
 
-
 class Game(commands.Cog):
     def __init__(self, bot: commands.bot):
         self.bot = bot
@@ -88,31 +105,39 @@ class Game(commands.Cog):
                 else:
                     self.mensagem[6] = self.mensagem[6] - 1
                     await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[6]} tentativas")
-                if self.mensagem[6] <= 0 or self.mensagem[4] == False:
-                    self.mensagem = []
                 print(self.mensagem)
+                vezes_jogada = await quantidades_de_vezes_jogadas( message.author.id)
             else:
                 print(f"{message.author.id}Pessoa não é {self.mensagem[5]} ou/e não esta no canal certo")
 
     @commands.command()
     async def jogar(self, ctx):
+        id_player = ctx.author.id
         if not self.mensagem:
-            req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
-            content = json.loads(req.content)
-            print(content["franquia"]["name"])
-            view = PersonagensView(content["id"], content["name"], content["gender"], content["franquia"]["name"])
-            embed = await view.get_embed()
-            imagem = await view.imagem()
-            msg = await ctx.send(embed=embed, file=imagem)
-            print("mensaem", msg)
-            res = await view.deletar_arquivo()
-            print(res)
-            self.mensagem = [ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5]
-            print(self.mensagem)
-            await asyncio.sleep(30)
-            if self.mensagem:
-                self.mensagem = []
-                await ctx.send("o jogo acabou!")
+            if not NUM_JOGADAS:
+                 NUM_JOGADAS[id_player] = ([id_player, 10, False])
+
+            if not id_player in NUM_JOGADAS:
+                NUM_JOGADAS[id_player] = ([id_player, 10, False])
+            if NUM_JOGADAS[ctx.author.id][1] > 0:
+                print(NUM_JOGADAS)
+                req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
+                content = json.loads(req.content)
+                print(content["franquia"]["name"])
+                view = PersonagensView(content["id"], content["name"], content["gender"], content["franquia"]["name"])
+                embed = await view.get_embed()
+                imagem = await view.imagem()
+                msg = await ctx.send(embed=embed, file=imagem)
+                print("mensagem : ", msg)
+                res = await view.deletar_arquivo()
+                print(res)
+                self.mensagem = [ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5]
+                print(self.mensagem)
+                await asyncio.sleep(30)
+                if self.mensagem:
+                    self.mensagem = []
+                    await ctx.send("o jogo acabou!")
+
         else:
             await ctx.send("um jogo ja esta em andamento")
 
