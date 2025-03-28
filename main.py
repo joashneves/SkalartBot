@@ -13,6 +13,7 @@ from models import Obter_cargo
 load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")  # pylint: disable=no-member
+ID_USER_MASTER = os.getenv("ID_USER_MASTER")
 
 # Permissões e afins
 permissoes = discord.Intents.default()
@@ -70,11 +71,6 @@ async def on_ready():
                 print(f"Atribuindo cargos para {member.name}")
                 await atribuir_cargos(member)
     await carregar_comandos()
-    try:
-        synced = await bot.tree.sync()  # Sincroniza os comandos de barra
-        print(f"Comandos de barra sincronizados: {len(synced)} comandos")
-    except Exception as e:
-        print(f"Erro ao sincronizar comandos de barra: {e}")
     print(f"Bot {bot.user.name} está online!")
 
     await bot.change_presence(
@@ -83,6 +79,20 @@ async def on_ready():
         name="Por todo tempo e espaço"))
 
     return "Bot Online"
+
+@bot.command()
+async def sincronizar(ctx: commands.Context):
+    if ctx.author.id == int(ID_USER_MASTER):
+       try:
+            synced = await bot.tree.sync()  # Sincroniza os comandos de barra
+            print(f"Comandos de barra sincronizados: {len(synced)} comandos")
+       except Exception as e:
+            print(f"Erro ao sincronizar comandos de barra: {e}")
+       await ctx.reply(f"{len(synced)} comandos sicronizados")
+       return
+    else:
+        await ctx.reply("Voce não tem permissão para esse comando")
+        return
 
 
 # Função main para ser chamada no script
