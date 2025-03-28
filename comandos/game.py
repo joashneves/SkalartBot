@@ -7,12 +7,19 @@ import aiohttp
 import hashlib
 import os
 import asyncio
+from asyncio import TaskGroup
+import threading
+from datetime import datetime
+from models.Obter_personagem import Manipular_Personagem
+
+
 
 IMAGENS_DIR = "imagens_temp"
 os.makedirs(IMAGENS_DIR, exist_ok=True)
 NUM_JOGADAS = {}
 
-async def quantidades_de_vezes_jogadas(id_player):
+async def reset_num_jogadas(id_player, sleeptime):
+    await asyncio.sleep(sleeptime)
     if not NUM_JOGADAS:
             NUM_JOGADAS[id_player] = ([id_player, 10, False])
     else:
@@ -21,7 +28,6 @@ async def quantidades_de_vezes_jogadas(id_player):
                 NUM_JOGADAS[id_player][1] = NUM_JOGADAS[id_player][1] - 1
             if NUM_JOGADAS[id_player][1] != 0 and NUM_JOGADAS[id_player][2] == False:
                 NUM_JOGADAS[id_player][2] = True
-                await asyncio.sleep(60*32)
                 print(f"resetou : ", id_player)
                 NUM_JOGADAS[id_player] = ([id_player, 10, False])
         else:
@@ -105,6 +111,16 @@ class Game(commands.Cog):
                 if self.mensagem[message.channel.id][5] == message.author.id and self.mensagem[message.channel.id][1] == message.channel.id:
                     if message.content.lower() == self.mensagem[message.channel.id][3].lower():
                         await message.channel.send("Voce acertou!")
+                        Manipular_Personagem.salvar_personagem(str(message.author.id),
+                                                               message.guild.id,
+                                                               message.channel.id,
+                                                               self.mensagem[message.channel.id][7],
+                                                               self.mensagem[message.channel.id][3],
+                                                               self.mensagem[message.channel.id][8],
+                                                               self.mensagem[message.channel.id][9],
+                                                               self.mensagem[message.channel.id][10],
+                                                               datetime.now()
+                                                                )
                         self.mensagem[message.channel.id] = []
                     elif self.mensagem[message.channel.id][6] <= 0:
                         await message.channel.send(f"Voce perdeu")
@@ -113,14 +129,16 @@ class Game(commands.Cog):
                         self.mensagem[message.channel.id][6] = self.mensagem[message.channel.id][6] - 1
                         await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[message.channel.id][6]} tentativas")
                     print(self.mensagem[message.channel.id])
-                    vezes_jogada = await quantidades_de_vezes_jogadas( message.author.id)
                     
                 else:
                     print(f"ID : {message.author.id} Pessoa não é {self.mensagem[message.channel.id][5]} ou/e não esta no canal certo")
 
-    async def temporizador(self, msg, channel_id, id_mensagem):
+    async def temporizador(self, msg, channel_id, id_mensagem, sleeptime):
+        print(f"AVISO : temporizador iniciado com {sleeptime} segundos , e self.mensagem {self.mensagem[channel_id]}")
+        await asyncio.sleep(sleeptime)
         if id_mensagem in self.mensagem[channel_id]:
-            await asyncio.sleep(12)
+            if self.mensagem[channel_id] == []:
+                return
             self.mensagem[channel_id] = []
             await msg.send("acabou o jogo")
 
@@ -128,48 +146,53 @@ class Game(commands.Cog):
     @commands.command()
     async def jogar(self, ctx):
         id_player = ctx.author.id
-        if id_player in NUM_JOGADAS and NUM_JOGADAS[id_player][1] <= 0:
-            await ctx.send("Quantidade de adivinhação vencida tente novamenteo mais tarde", ephemeral=True)
-            return
+        try:
+            if id_player in NUM_JOGADAS and NUM_JOGADAS[id_player][1] <= 0:
+                await ctx.send("Quantidade de adivinhação vencida tente novamenteo mais tarde", ephemeral=True)
+                return
 
-        if ctx.channel.id in self.mensagem and self.mensagem[ctx.channel.id] != []:
-            await ctx.send("Alguem ja esta jogando", ephemeral=True)
-            return
-        
-        if not ctx.channel.id in self.mensagem or self.mensagem[ctx.channel.id] == []:
-            if not NUM_JOGADAS:
-                 NUM_JOGADAS[id_player] = ([id_player, 10, False])
+            if ctx.channel.id in self.mensagem and self.mensagem[ctx.channel.id] != []:
+                await ctx.send("Alguem ja esta jogando", ephemeral=True)
+                return
+            
+            if not ctx.channel.id in self.mensagem or self.mensagem[ctx.channel.id] == []:
+                if not NUM_JOGADAS:
+                    NUM_JOGADAS[id_player] = ([id_player, 10, False])
 
-            if not id_player in NUM_JOGADAS:
-                NUM_JOGADAS[id_player] = ([id_player, 10, False])
+                if not id_player in NUM_JOGADAS:
+                    NUM_JOGADAS[id_player] = ([id_player, 10, False])
 
 
-            if NUM_JOGADAS[ctx.author.id][1] > 0:
-                print(f" VAR : Numenro de tentativas {NUM_JOGADAS}")
-                await ctx.send(f"carregando a imagem, aguarde... voce tem {NUM_JOGADAS[id_player][1]} jogadas")
-                req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
-                print(req)
-                content = json.loads(req.content)
-                print(content["franquia"]["name"])
-                view = PersonagensView(content["id"], content["name"], content["gender"], content["franquia"]["name"])
-                embed = await view.get_embed()
-                imagem = await view.imagem()
-                msg = await ctx.send(embed=embed, file=imagem)
-                print("mensagem : ", msg)
-                res = await view.deletar_arquivo()
-                print(res)
-                self.mensagem[msg.channel.id] = ([ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5])
-                if msg.channel.id in self.mensagem:
-                    await self.temporizador(ctx, msg.channel.id, msg.id)
-                print(f"VAR : nova self.mensagem = {self.mensagem}")
-        else:
-            await ctx.send("um jogo ja esta em andamento", ephemeral=True)
+                if NUM_JOGADAS[ctx.author.id][1] > 0:
+                    print(f" VAR : Numenro de tentativas {NUM_JOGADAS}")
+                    await ctx.send(f"carregando a imagem, aguarde... voce tem {NUM_JOGADAS[id_player][1]} jogadas")
+                    req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
+                    print(req)
+                    content = json.loads(req.content)
+                    print(content["franquia"]["name"])
+                    view = PersonagensView(content["id"], content["name"], content["gender"], content["franquia"]["name"])
+                    embed = await view.get_embed()
+                    imagem = await view.imagem()
+                    msg = await ctx.send(embed=embed, file=imagem)
+                    print("VAR : mensagem = ", msg)
+                    res = await view.deletar_arquivo()
+                    print(res)
+                    self.mensagem[msg.channel.id] = ([ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5, content["id"], content["gender"], content["franquia"]["name"], content["caminhoArquivo"]])
+                    async with TaskGroup() as group:
+                        if msg.channel.id in self.mensagem:
+                            group.create_task(self.temporizador(ctx, msg.channel.id, msg.id, 26))
+                        print(f"VAR : nova self.mensagem = {self.mensagem}")
+                        if NUM_JOGADAS[ctx.author.id][1] == 10:
+                            group.create_task(reset_num_jogadas(ctx.author.id, 60*30))
+                        NUM_JOGADAS[ctx.author.id][1] = NUM_JOGADAS[ctx.author.id][1] - 1
+                else:
+                    await ctx.send("Quantidade de adivinhação vencida tente novamenteo mais tarde", ephemeral=True)
 
-    @jogar.error
-    async def command_error(ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            em = discord.Embed(title=f"command is on cooldown",description=f"Try again in {error.retry_after:.2f}s.", color=0xFFFF00)
-            await ctx.send(embed=em)
+            else:
+                await ctx.send("um jogo ja esta em andamento", ephemeral=True)
+        except:
+            await ctx.send("Ocorreu um erro")
+
 
 async def setup(bot):
     await bot.add_cog(Game(bot))

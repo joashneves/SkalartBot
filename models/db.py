@@ -70,6 +70,20 @@ class FeedConfig(Base):
     guild_id = Column(String, nullable=False, index=True)
     channel_id = Column(String, nullable=False, index=True)
 
+class Personagem(Base):
+    __tablename__ = "personagem"
+    id = Column(Integer, primary_key=True, index=True)
+    id_discord = Column(String, nullable=False, index=True)
+    guild_id = Column(String, nullable=False, index=True)
+    channel_id = Column(String, nullable=False, index=True)
+    id_personagem = Column(Integer, nullable=False, index=False)
+    nome_personagem = Column(String, nullable=False, index=False)
+    descricao_personagem = Column(String, nullable=False, default="Faça sua descrição")
+    genero_personagem = Column(String, nullable=False, index=False)
+    franquia_personagem = Column(String, nullable=False, index=False)
+    caminho_arquivo_personagem = Column(String, nullable=False, index=False)
+    data_de_descoberta = Column(DateTime, nullable=False)
+
 
 class TicketConfig(Base):
     __tablename__ = "ticket_Config"
