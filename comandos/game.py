@@ -8,11 +8,8 @@ import hashlib
 import os
 import asyncio
 from asyncio import TaskGroup
-import threading
 from datetime import datetime
 from models.Obter_personagem import Manipular_Personagem
-
-
 
 IMAGENS_DIR = "imagens_temp"
 os.makedirs(IMAGENS_DIR, exist_ok=True)
@@ -129,7 +126,7 @@ class Game(commands.Cog):
                         self.mensagem[message.channel.id][6] = self.mensagem[message.channel.id][6] - 1
                         await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[message.channel.id][6]} tentativas")
                     print(self.mensagem[message.channel.id])
-                    
+
                 else:
                     print(f"ID : {message.author.id} Pessoa não é {self.mensagem[message.channel.id][5]} ou/e não esta no canal certo")
 
@@ -142,7 +139,7 @@ class Game(commands.Cog):
             self.mensagem[channel_id] = []
             await msg.send("acabou o jogo")
 
-        
+
     @commands.command()
     async def jogar(self, ctx):
         id_player = ctx.author.id
@@ -154,7 +151,7 @@ class Game(commands.Cog):
             if ctx.channel.id in self.mensagem and self.mensagem[ctx.channel.id] != []:
                 await ctx.send("Alguem ja esta jogando", ephemeral=True)
                 return
-            
+
             if not ctx.channel.id in self.mensagem or self.mensagem[ctx.channel.id] == []:
                 if not NUM_JOGADAS:
                     NUM_JOGADAS[id_player] = ([id_player, 10, False])

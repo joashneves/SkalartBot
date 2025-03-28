@@ -8,17 +8,18 @@ class Manipular_Personagem:
         with _Sessao() as sessao:
             personagens = sessao.query(Personagem).filter_by(id_discord=id_discord, guild_id=guild_id).all()
             return personagens
-        
+
     def obter_todos_personagens_descoberto_servidor(guild_id):
         with _Sessao() as sessao:
             personagens = sessao.query(Personagem).filter_by(guild_id=guild_id).all()
             return personagens
-        
-    def obter_todos_personagens_descoberto_usuario(id_discord):
+
+    def obter_todos_personagens_descoberto_usuario(id_discord, guild_id):
+        print()
         with _Sessao() as sessao:
-            personagens = sessao.query(Personagem).filter_by(id_discord=id_discord).all()
+            personagens = sessao.query(Personagem).filter_by(id_discord=id_discord, guild_id=guild_id).all()
             return personagens
-        
+
     def salvar_personagem(id_discord,
                           guild_id,
                           channel_id,
@@ -29,7 +30,7 @@ class Manipular_Personagem:
                           caminho_arquivo_personagem,
                           data_de_descoberta
                     ):
-        with _Sessao() as sessao: 
+        with _Sessao() as sessao:
             novo_personagem = Personagem(id_discord=id_discord,
                                          guild_id=guild_id,
                                          channel_id=channel_id,
@@ -72,7 +73,7 @@ class Manipular_Personagem:
             personagem_alterado.descricao_personagem = descricao_personagem
             sessao.commit()
 
-    
+
     def deletar_personagem(id_discord,
                           guild_id,
                           channel_id,
@@ -84,7 +85,7 @@ class Manipular_Personagem:
                           caminho_arquivo_personagem,
                           data_de_descoberta
                     ):
-        with _Sessao() as sessao: 
+        with _Sessao() as sessao:
             personagem = sessao.query(Personagem).filter_by(id_discord=id_discord,
                                          guild_id=guild_id,
                                          channel_id=channel_id,
