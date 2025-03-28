@@ -19,7 +19,7 @@ class DoarPersonagem(commands.Cog):
         if message.author.id in self.troca:
             id_dono_novo = message.author.id
             if self.troca[message.author.id] != []:
-                if message.content.startswith("sim"):
+                if (message.content.lower()) in ["sim", "s", "yes", "y"] :
                     await message.channel.send("A troca foi aceita")
                     Manipular_Personagem.alterar_dono_personage(self.troca[id_dono_novo][0],
                         self.troca[id_dono_novo][1],
@@ -29,7 +29,7 @@ class DoarPersonagem(commands.Cog):
                         self.troca[id_dono_novo][5])
                     del self.troca[message.author.id]
                     await message.channel.send("Personagem trocado!")
-                elif message.content.startswith("não"):
+                elif (message.content.lower()) in ["não", "nao", "n", "no", "n"]:
                     await message.channel.send("A troca foi recusada")
                     del self.troca[message.author.id]
                     print(f"VAR : {self.troca}")
@@ -65,7 +65,7 @@ class DoarPersonagem(commands.Cog):
             return
         if not personagem:
             return
-        await interaction.response.send_message(f"Troca iniciada, responda com sim ou não{nome}, {franquia}, {user}, {personagem}")
+        await interaction.response.send_message(f"Troca iniciada, responda com sim['s'] ou não['n', 'no', 'não']")
         msg = interaction.id
         self.troca[id_dono_novo] = ([id_dono_novo, id_dono_antigo, guild_id, personagem.id_personagem, nome, franquia ])
         print(f"VAR : {self.troca[id_dono_novo]}")

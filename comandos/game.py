@@ -108,7 +108,7 @@ class Game(commands.Cog):
                     if message.content.lower() == self.mensagem[message.channel.id][3].lower():
                         await message.channel.send("Voce acertou!")
                         print(f"PROMPT : {message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9]}")
-                        personagem = Manipular_Personagem.Obeter_um_personagem(message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9])
+                        personagem = Manipular_Personagem.Obter_um_personagem(message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9])
                         if not personagem:
 
                             Manipular_Personagem.salvar_personagem(str(message.author.id),
