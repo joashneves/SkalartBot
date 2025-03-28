@@ -65,8 +65,7 @@ class PersonagensView(discord.ui.View):
         caminho_arquivo = await self.imagem()
 
         embed = discord.Embed(
-            title=f"Personagem: {self.name}",
-            description=f"Franquia: {self.franquia} \n Genero: {self.gender}",
+            title=f"Adivinhe o personagem",
             color=discord.Color.blue(),
         )
         embed.set_image(url=f"attachment://image.jpg")
