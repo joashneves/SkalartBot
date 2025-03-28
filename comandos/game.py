@@ -108,16 +108,26 @@ class Game(commands.Cog):
                 if self.mensagem[message.channel.id][5] == message.author.id and self.mensagem[message.channel.id][1] == message.channel.id:
                     if message.content.lower() == self.mensagem[message.channel.id][3].lower():
                         await message.channel.send("Voce acertou!")
-                        Manipular_Personagem.salvar_personagem(str(message.author.id),
-                                                               message.guild.id,
-                                                               message.channel.id,
-                                                               self.mensagem[message.channel.id][7],
-                                                               self.mensagem[message.channel.id][3],
-                                                               self.mensagem[message.channel.id][8],
-                                                               self.mensagem[message.channel.id][9],
-                                                               self.mensagem[message.channel.id][10],
-                                                               datetime.now()
-                                                                )
+                        print(f"PROMPT : {message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9]}")
+                        personagem = Manipular_Personagem.Obeter_um_personagem(message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9])
+                        if not personagem:
+
+                            Manipular_Personagem.salvar_personagem(str(message.author.id),
+                                                                message.guild.id,
+                                                                message.channel.id,
+                                                                self.mensagem[message.channel.id][7],
+                                                                self.mensagem[message.channel.id][3],
+                                                                self.mensagem[message.channel.id][8],
+                                                                self.mensagem[message.channel.id][9],
+                                                                self.mensagem[message.channel.id][10],
+                                                                datetime.now()
+                                                                    )
+                            await message.channel.send(f"{self.mensagem[message.channel.id][3]} agora é seu!")
+                        elif personagem.id_discord == message.author.id:
+                            print(f"VAR : {personagem.id_discord == message.author.id}")
+                            await message.channel.send("Voce ja possui esse personagem.")
+                        else:
+                            await message.channel.send(f"{self.mensagem[message.channel.id][3]} Ja pertence a alguem!")
                         self.mensagem[message.channel.id] = []
                     elif self.mensagem[message.channel.id][6] <= 0:
                         await message.channel.send(f"Voce perdeu")

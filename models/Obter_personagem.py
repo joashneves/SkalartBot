@@ -9,6 +9,11 @@ class Manipular_Personagem:
             personagens = sessao.query(Personagem).filter_by(id_discord=id_discord, guild_id=guild_id).all()
             return personagens
 
+    def Obeter_um_personagem(guild_id, nome_personagem, franquia_personagem):
+        with _Sessao() as sessao:
+            personagem = sessao.query(Personagem).filter_by(guild_id=guild_id, nome_personagem=nome_personagem, franquia_personagem=franquia_personagem).first()
+            return personagem
+
     def obter_todos_personagens_descoberto_servidor(guild_id):
         with _Sessao() as sessao:
             personagens = sessao.query(Personagem).filter_by(guild_id=guild_id).all()
