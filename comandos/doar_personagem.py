@@ -5,6 +5,77 @@ import asyncio
 from asyncio import TaskGroup
 import models
 from models.Obter_personagem import Manipular_Personagem
+import os
+import json
+import aiohttp
+import hashlib
+
+IMAGENS_DIR = "imagens_temp"
+os.makedirs(IMAGENS_DIR, exist_ok=True)
+
+async def carrega_imagem(url) -> str:
+    """
+    Salva uma imagem localmente e retorna o caminho do arquivo.
+    :param url: URL da imagem.
+    :param user_id: ID do usuário que enviou a imagem.
+    :return: Caminho do arquivo salvo.
+    """
+    nome_arquivo = f"{hashlib.md5(url.encode()).hexdigest()}.png"
+    caminho_arquivo = os.path.join(IMAGENS_DIR, nome_arquivo)
+
+    # Baixa a imagem e salva localmente
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                with open(caminho_arquivo, "wb") as f:
+                    f.write(await response.read())
+                return caminho_arquivo
+            else:
+                raise Exception(f"Erro ao baixar imagem: status {response.status}")
+
+class PersonagensView(discord.ui.View):
+    def __init__(self, guild_id, membro_id, personagem, interaction):
+        super().__init__(timeout=None)
+        self.guild_id = guild_id
+        self.membro_id = membro_id
+        self.personagem = personagem
+        self.index = 0
+        self.caminho = None
+
+    async def get_embed(self):
+        caminho_arquivo = await self.imagem()
+        print(f"VAR : personagens {self.personagem}")
+
+        embed = discord.Embed(
+            title=f"Personagem: {self.personagem.nome_personagem}",
+            #description=f"Franquia: c \n Genero: {self.personagem.genero_personagem} \n Descrição: {self.personagem.descricao_personagem}",
+            color=discord.Color.blue(),
+        )
+        embed.add_field(name="Franquia",value=f"{self.personagem.franquia_personagem}",inline=False)
+        embed.add_field(name="Genero",value=f"{self.personagem.genero_personagem}", inline=False)
+        embed.add_field(name="Descrição",value=f"{self.personagem.descricao_personagem}", inline=False)
+        embed.set_image(url=f"attachment://image.jpg")
+        print(caminho_arquivo)
+        embed.set_footer(text=f"Descoberto em : {self.personagem.data_de_descoberta}")
+        return embed
+
+    async def imagem(self):
+        print(f"VAR: {self.personagem}")
+        caminho_arquivo = await carrega_imagem(f"https://personagensaleatorios.squareweb.app/api/Personagems/DownloadPersonagemByPath?Path={self.personagem.caminho_arquivo_personagem}")
+        self.caminho = caminho_arquivo
+        discord_file = discord.File(caminho_arquivo, 'image.jpg')
+        return discord_file
+
+    async def deletar_arquivo(self):
+        try:
+            if os.path.exists(self.caminho):
+                os.remove(self.caminho)
+            else:
+                return "caminho não encontrado!"
+            return f"arquivo deletado do {self.caminho}"
+        except:
+            return "erro ao apagar arquivo"
+            
 class DoarPersonagem(commands.Cog):
     def __init__(self, bot: commands.bot):
         super().__init__()
@@ -65,7 +136,12 @@ class DoarPersonagem(commands.Cog):
             return
         if not personagem:
             return
-        await interaction.response.send_message(f"Troca iniciada, responda com sim['s'] ou não['n', 'no', 'não']")
+
+        view = PersonagensView(guild_id, id_dono_antigo, personagem, interaction)
+        embed = await view.get_embed()
+        arquivo = await view.imagem()
+        await view.deletar_arquivo()
+        await interaction.response.send_message(f"Troca iniciada, responda com sim['s'] ou não['n', 'no', 'não'] <@{id_dono_novo}>",view=view, embed=embed, file=arquivo)    
         msg = interaction.id
         self.troca[id_dono_novo] = ([id_dono_novo, id_dono_antigo, guild_id, personagem.id_personagem, nome, franquia ])
         print(f"VAR : {self.troca[id_dono_novo]}")
