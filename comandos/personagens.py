@@ -5,8 +5,6 @@ from models.Obter_personagem import Manipular_Personagem
 import aiohttp
 import hashlib
 import os
-import json
-
 
 IMAGENS_DIR = "imagens_temp"
 os.makedirs(IMAGENS_DIR, exist_ok=True)
@@ -30,16 +28,39 @@ async def carrega_imagem(url) -> str:
                 return caminho_arquivo
             else:
                 raise Exception(f"Erro ao baixar imagem: status {response.status}")
+            
+
+class DescricaoModal(discord.ui.Modal):
+    def __init__(self, nome_personagem, nome_franquia):
+        super().__init__(title="Alterar descrição do personagem")
+        self.nome_personagem = nome_personagem
+        self.nome_franquia = nome_franquia
+
+    descricao = discord.ui.TextInput(
+        label="Descrição",
+        placeholder="Escreva uma descrição",
+        max_length=455,
+        style=discord.TextStyle.long,
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        id_discord = interaction.user.id
+        descricao = self.descricao.value
+        Manipular_Personagem.alterar_descricao_personage(id_discord, interaction.guild.id, self.nome_personagem, self.nome_franquia, descricao)
+        message = "Descrição atualizada!"
+        print(f"MSG : ", message)
+        await interaction.response.send_message(f"{message}", ephemeral=True)
+
 
 class PersonagensView(discord.ui.View):
-    def __init__(self, guild_id, membro_id, personages, interaction):
+    def __init__(self, guild_id, membro_id, personages):
         super().__init__(timeout=None)
         self.guild_id = guild_id
         self.membro_id = membro_id
         self.personagens = personages
         self.index = 0
         self.caminho = None
-
+        
     async def update_message(self, interaction):
         caminho_arquivo = await self.imagem()
         print(f"VAR : personagens {self.personagens[self.index]}")
@@ -93,6 +114,18 @@ class PersonagensView(discord.ui.View):
         res = await self.deletar_arquivo()
         print(f"AÇÃO : {res}")
 
+    @discord.ui.button( label=f"Editar", style=discord.ButtonStyle.success)        
+    async def editar_botao(    
+                self, interaction: discord.Interaction, button: discord.ui.Button
+            ):
+                print(f"VAR : dono {self.personagens[self.index].id_discord}")
+                if interaction.user.id != int(self.personagens[self.index].id_discord):
+                    await interaction.response.send_message("Voce não é o dono desse personagem", ephemeral=True)
+                    return
+                await interaction.response.send_modal(DescricaoModal(self.personagens[self.index].nome_personagem,self.personagens[self.index].franquia_personagem))
+
+
+
 class Personagens(commands.Cog):
     def __init__(self, bot: commands.bot):
         self.bot = bot
@@ -106,10 +139,11 @@ class Personagens(commands.Cog):
         personagens = Manipular_Personagem.obter_todos_personagens_descoberto_usuario(usuario.id, interaction.guild.id)
         print(f"Var : Personagens = {personagens}")
         if personagens:
-            view = PersonagensView(interaction.guild.id, interaction.user.id, personagens, interaction)
+            view = PersonagensView(interaction.guild.id, interaction.user.id, personagens)
             embed= await view.update_message(interaction)
             imagem = await view.imagem()
             res = await view.deletar_arquivo()
+            
             print(f"AÇÃO : {res}")
             await interaction.response.send_message(view=view, embed=embed, file=imagem)
         else:

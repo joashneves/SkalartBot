@@ -9,7 +9,9 @@ import os
 import asyncio
 from asyncio import TaskGroup
 from datetime import datetime
+import random
 from models.Obter_personagem import Manipular_Personagem
+from models.Obter_Usuario import Manipular_Usuario
 
 IMAGENS_DIR = "imagens_temp"
 os.makedirs(IMAGENS_DIR, exist_ok=True)
@@ -99,7 +101,6 @@ class Game(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
-
         if message.channel.id in self.mensagem:
             print(f"VAR : menssagem guild id {message.channel.id}")
             print(f"VAR : self.mensagem[id] : {self.mensagem[message.channel.id]}")
@@ -107,6 +108,14 @@ class Game(commands.Cog):
                 if self.mensagem[message.channel.id][5] == message.author.id and self.mensagem[message.channel.id][1] == message.channel.id:
                     if message.content.lower() == self.mensagem[message.channel.id][3].lower():
                         await message.channel.send("Voce acertou!")
+                        id_usuario_string = str(message.author.id)
+                        usuario = Manipular_Usuario.obter_usuario(id_usuario_string)
+                        if usuario:
+                            xp = random.randint(15, 25)
+                            dinheiro = random.randint(50, 70)
+                            Manipular_Usuario.adicionar_xp(id_usuario_string, xp )
+                            Manipular_Usuario.adicionar_moedas(id_usuario_string, dinheiro)
+                            print(f"AÇÃO : Moedas {dinheiro} e xp {xp} adicionadas ao {usuario.id_discord}")
                         print(f"PROMPT : {message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9]}")
                         personagem = Manipular_Personagem.Obter_um_personagem(message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9])
                         if not personagem:
@@ -193,8 +202,8 @@ class Game(commands.Cog):
 
             else:
                 await ctx.send("um jogo ja esta em andamento", ephemeral=True)
-        except e:
-            await ctx.send("Ocorreu um erro : ", e)
+        except:
+            await ctx.send("Ocorreu um erro ")
 
 
 async def setup(bot):
