@@ -101,8 +101,9 @@ class Personagens(commands.Cog):
         name="listar_personagens",
         description="Lista todos os personagens capturados.",
     )
-    async def listar_personagens_slash(self, interaction: discord.Interaction):
-        personagens = Manipular_Personagem.obter_todos_personagens_descoberto_usuario(interaction.user.id, interaction.guild.id)
+    async def listar_personagens_slash(self, interaction: discord.Interaction,  usuario: discord.User = None):
+        usuario = (usuario or interaction.user)
+        personagens = Manipular_Personagem.obter_todos_personagens_descoberto_usuario(usuario.id, interaction.guild.id)
         print(f"Var : Personagens = {personagens}")
         if personagens:
             view = PersonagensView(interaction.guild.id, interaction.user.id, personagens, interaction)
