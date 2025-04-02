@@ -110,7 +110,6 @@ class Game(commands.Cog):
                         print(f"PROMPT : {message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9]}")
                         personagem = Manipular_Personagem.Obter_um_personagem(message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9])
                         if not personagem:
-
                             Manipular_Personagem.salvar_personagem(str(message.author.id),
                                                                 message.guild.id,
                                                                 message.channel.id,
@@ -127,25 +126,23 @@ class Game(commands.Cog):
                             await message.channel.send("Voce ja possui esse personagem.")
                         else:
                             await message.channel.send(f"{self.mensagem[message.channel.id][3]} Ja pertence a alguem!")
-                        self.mensagem[message.channel.id] = []
+                        del self.mensagem[message.channel.id]
                     elif self.mensagem[message.channel.id][6] <= 0:
                         await message.channel.send(f"Voce perdeu")
-                        self.mensagem[message.channel.id] = []
+                        del self.mensagem[message.channel.id]
                     else:
                         self.mensagem[message.channel.id][6] = self.mensagem[message.channel.id][6] - 1
                         await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[message.channel.id][6]} tentativas")
-                    print(self.mensagem[message.channel.id])
-
                 else:
                     print(f"ID : {message.author.id} Pessoa não é {self.mensagem[message.channel.id][5]} ou/e não esta no canal certo")
 
     async def temporizador(self, msg, channel_id, id_mensagem, sleeptime):
         print(f"AVISO : temporizador iniciado com {sleeptime} segundos , e self.mensagem {self.mensagem[channel_id]}")
         await asyncio.sleep(sleeptime)
-        if id_mensagem in self.mensagem[channel_id]:
+        if channel_id in self.mensagem:
             if self.mensagem[channel_id] == []:
                 return
-            self.mensagem[channel_id] = []
+            del self.mensagem[channel_id]
             await msg.send("acabou o jogo")
 
 
@@ -196,8 +193,8 @@ class Game(commands.Cog):
 
             else:
                 await ctx.send("um jogo ja esta em andamento", ephemeral=True)
-        except:
-            await ctx.send("Ocorreu um erro")
+        except e:
+            await ctx.send("Ocorreu um erro : ", e)
 
 
 async def setup(bot):
