@@ -86,8 +86,8 @@ class DoarPersonagem(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
-        print(f"VAR : {self.troca}")
         if message.author.id in self.troca:
+            print(f"VAR : {self.troca}")
             id_dono_novo = message.author.id
             if self.troca[message.author.id] != []:
                 if (message.content.lower()) in ["sim", "s", "yes", "y"] :
