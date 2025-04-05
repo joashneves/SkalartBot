@@ -101,61 +101,72 @@ class Game(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
-        if message.channel.id in self.mensagem:
-            print(f"VAR : menssagem guild id {message.channel.id}")
-            print(f"VAR : self.mensagem[id] : {self.mensagem[message.channel.id]}")
-            if  self.mensagem[message.channel.id] != []:
-                if self.mensagem[message.channel.id][5] == message.author.id and self.mensagem[message.channel.id][1] == message.channel.id:
-                    if message.content.lower() == self.mensagem[message.channel.id][3].lower():
-                        await message.channel.send("Voce acertou!")
-                        id_usuario_string = str(message.author.id)
-                        usuario = Manipular_Usuario.obter_usuario(id_usuario_string)
-                        if usuario:
-                            xp = random.randint(15, 25)
-                            dinheiro = random.randint(50, 70)
-                            Manipular_Usuario.adicionar_xp(id_usuario_string, xp )
-                            Manipular_Usuario.adicionar_moedas(id_usuario_string, dinheiro)
-                            print(f"AÇÃO : Moedas {dinheiro} e xp {xp} adicionadas ao {usuario.id_discord}")
-                        print(f"PROMPT : {message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9]}")
-                        personagem = Manipular_Personagem.Obter_um_personagem(message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9])
-                        if not personagem:
-                            Manipular_Personagem.salvar_personagem(str(message.author.id),
-                                                                message.guild.id,
-                                                                message.channel.id,
-                                                                self.mensagem[message.channel.id][7],
-                                                                self.mensagem[message.channel.id][3],
-                                                                self.mensagem[message.channel.id][8],
-                                                                self.mensagem[message.channel.id][9],
-                                                                self.mensagem[message.channel.id][10],
-                                                                datetime.now()
-                                                                    )
-                            await message.channel.send(f"{self.mensagem[message.channel.id][3]} agora é seu!")
-                        elif personagem.id_discord == message.author.id:
-                            print(f"VAR : {personagem.id_discord == message.author.id}")
-                            await message.channel.send("Voce ja possui esse personagem.")
+        try:
+            if message.channel.id in self.mensagem:
+                print(f"VAR : menssagem guild id {message.channel.id}")
+                print(f"VAR : self.mensagem[id] : {self.mensagem[message.channel.id]}")
+                if  self.mensagem[message.channel.id] != []:
+                    if self.mensagem[message.channel.id][5] == message.author.id and self.mensagem[message.channel.id][1] == message.channel.id:
+                        if message.content.lower() in ["ff", "desisto!"]:
+                            del self.mensagem[message.channel.id]
+                            await message.channel.send(f"Voce desistiu!")
+                        if message.content.lower() == self.mensagem[message.channel.id][3].lower():
+                            await message.channel.send("Voce acertou!")
+                            id_usuario_string = str(message.author.id)
+                            usuario = Manipular_Usuario.obter_usuario(id_usuario_string)
+                            if usuario:
+                                xp = random.randint(15, 25)
+                                dinheiro = random.randint(50, 70)
+                                Manipular_Usuario.adicionar_xp(id_usuario_string, xp )
+                                Manipular_Usuario.adicionar_moedas(id_usuario_string, dinheiro)
+                                print(f"AÇÃO : Moedas {dinheiro} e xp {xp} adicionadas ao {usuario.id_discord}")
+                            print(f"PROMPT : {message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9]}")
+                            personagem = Manipular_Personagem.Obter_um_personagem(message.guild.id, self.mensagem[message.channel.id][3], self.mensagem[message.channel.id][9])
+                            if not personagem:
+                                Manipular_Personagem.salvar_personagem(str(message.author.id),
+                                                                    message.guild.id,
+                                                                    message.channel.id,
+                                                                    self.mensagem[message.channel.id][7],
+                                                                    self.mensagem[message.channel.id][3],
+                                                                    self.mensagem[message.channel.id][8],
+                                                                    self.mensagem[message.channel.id][9],
+                                                                    self.mensagem[message.channel.id][10],
+                                                                    datetime.now()
+                                                                        )
+                                await message.channel.send(f"{self.mensagem[message.channel.id][3]} agora é seu!")
+                            elif personagem.id_discord == message.author.id:
+                                print(f"VAR : {personagem.id_discord == message.author.id}")
+                                await message.channel.send("Voce ja possui esse personagem.")
+                            else:
+                                await message.channel.send(f"{self.mensagem[message.channel.id][3]} Ja pertence a alguem!")
+                            del self.mensagem[message.channel.id]
+                        elif self.mensagem[message.channel.id][6] <= 0:
+                            del self.mensagem[message.channel.id]
+                            await message.channel.send(f"Voce perdeu")
                         else:
-                            await message.channel.send(f"{self.mensagem[message.channel.id][3]} Ja pertence a alguem!")
-                        del self.mensagem[message.channel.id]
-                    elif self.mensagem[message.channel.id][6] <= 0:
-                        await message.channel.send(f"Voce perdeu")
-                        del self.mensagem[message.channel.id]
+                            await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[message.channel.id][6]} tentativas")
+                            self.mensagem[message.channel.id][6] = self.mensagem[message.channel.id][6] - 1
                     else:
-                        self.mensagem[message.channel.id][6] = self.mensagem[message.channel.id][6] - 1
-                        await message.channel.send(f"Voce errou! Agora voce só tem {self.mensagem[message.channel.id][6]} tentativas")
-                else:
-                    print(f"ID : {message.author.id} Pessoa não é {self.mensagem[message.channel.id][5]} ou/e não esta no canal certo")
+                        print(f"ID : {message.author.id} Pessoa não é {self.mensagem[message.channel.id][5]} ou/e não esta no canal certo")
+        except Exception as e:
+            print(f"Aviso de error : {e}")
 
     async def temporizador(self, msg, channel_id, id_mensagem, sleeptime):
         print(f"AVISO : temporizador iniciado com {sleeptime} segundos , e self.mensagem {self.mensagem[channel_id]}")
         await asyncio.sleep(sleeptime)
+        print(f"AVISO : Saiu do temporizador")
         if channel_id in self.mensagem:
+            if not id_mensagem in self.mensagem[channel_id]:
+                return
             if self.mensagem[channel_id] == []:
                 return
+            print(f"o jogo do {id_mensagem}")
             del self.mensagem[channel_id]
             await msg.send("acabou o jogo")
 
 
     @commands.command()
+    @commands.cooldown(1, 9, commands.BucketType.user)
     async def jogar(self, ctx):
         id_player = ctx.author.id
         try:
@@ -191,20 +202,39 @@ class Game(commands.Cog):
                     print(res)
                     self.mensagem[msg.channel.id] = ([ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5, content["id"], content["gender"], content["franquia"]["name"], content["caminhoArquivo"]])
                     async with TaskGroup() as group:
-                        if msg.channel.id in self.mensagem:
-                            group.create_task(self.temporizador(ctx, msg.channel.id, msg.id, 26))
-                        print(f"VAR : nova self.mensagem = {self.mensagem}")
-                        if NUM_JOGADAS[ctx.author.id][1] == 10:
-                            group.create_task(reset_num_jogadas(ctx.author.id, 60*30))
-                        NUM_JOGADAS[ctx.author.id][1] = NUM_JOGADAS[ctx.author.id][1] - 1
+                        try:
+                            if msg.channel.id in self.mensagem:
+                                tesk = group.create_task(self.temporizador(ctx, msg.channel.id, msg.id, 26))
+                                if tesk:
+                                    tesk.cancel()
+                                    group.create_task(self.temporizador(ctx, msg.channel.id, msg.id, 26))                     
+                            print(f"VAR : nova self.mensagem = {self.mensagem}")
+                            if NUM_JOGADAS[ctx.author.id][1] == 10:
+                                group.create_task(reset_num_jogadas(ctx.author.id, 60*30))
+                            NUM_JOGADAS[ctx.author.id][1] = NUM_JOGADAS[ctx.author.id][1] - 1
+                        except asyncio.CancelledError:
+                            print("ALARM : Event loop was cancelled")
+                        except Exception as e:
+                            print(f"AVISO ERROR : {e}")
                 else:
                     await ctx.send("Quantidade de adivinhação vencida tente novamenteo mais tarde", ephemeral=True)
 
             else:
                 await ctx.send("um jogo ja esta em andamento", ephemeral=True)
-        except:
+        except Exception as e:
+            print(f"AVISO DE ERROR : Error em $jogar {e}")
             await ctx.send("Ocorreu um erro ")
 
+    @jogar.error
+    async def jogar_error(self, ctx, err):
+        if isinstance(err, commands.errors.CommandOnCooldown):
+            tentativa = err.retry_after
+            tentativa
+            await ctx.reply(f'Comando esta em cooldown para voce, tente novamente em {round(tentativa, 2)} segundos', ephemeral=True)
+            print(f"AVISO DE ERROR : {tentativa}")
+
+        print(f"AVISO DE ERROR : {err}")
+        
 
 async def setup(bot):
     await bot.add_cog(Game(bot))
