@@ -7,3 +7,4 @@ pre-commit
 sqlalchemy
 pytz
 dotenv
+requests

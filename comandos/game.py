@@ -96,6 +96,7 @@ class Game(commands.Cog):
     def __init__(self, bot: commands.bot):
         self.bot = bot
         self.mensagem = {}
+        self.delymensagem = {}
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -174,9 +175,12 @@ class Game(commands.Cog):
                 await ctx.send("Quantidade de adivinhação vencida tente novamenteo mais tarde", ephemeral=True)
                 return
 
-            if ctx.channel.id in self.mensagem and self.mensagem[ctx.channel.id] != []:
+            if ctx.channel.id in self.delymensagem:
                 await ctx.send("Alguem ja esta jogando", ephemeral=True)
                 return
+            else:
+                self.delymensagem[ctx.channel.id] = ctx.author.id
+
 
             if not ctx.channel.id in self.mensagem or self.mensagem[ctx.channel.id] == []:
                 if not NUM_JOGADAS:
@@ -200,6 +204,7 @@ class Game(commands.Cog):
                     print("VAR : mensagem = ", msg)
                     res = await view.deletar_arquivo()
                     print(res)
+                    del self.delymensagem[ctx.channel.id]
                     self.mensagem[msg.channel.id] = ([ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5, content["id"], content["gender"], content["franquia"]["name"], content["caminhoArquivo"]])
                     async with TaskGroup() as group:
                         try:
