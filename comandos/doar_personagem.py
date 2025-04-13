@@ -154,9 +154,10 @@ class DoarPersonagem(commands.Cog):
         opcaoes = []
         personas = Manipular_Personagem.obter_todos_personagens_descoberto_usuario(interact.user.id, interact.guild.id)
         for sonas in personas:
-            sonas_option = app_commands.Choice(name=f"{sonas.nome_personagem}", value=f"{sonas.nome_personagem}")
-            opcaoes.append(sonas_option)
-        return opcaoes
+            if pesquisa.lower() in sonas.nome_personagem.lower():
+                sonas_option = app_commands.Choice(name=f"{sonas.nome_personagem}", value=f"{sonas.nome_personagem}")
+                opcaoes.append(sonas_option)
+        return opcaoes[:25]
 
     @doar_personagem.autocomplete('franquia')
     async def doar_personagem_autocomplete_franquia(self,interact: discord.Interaction, pesquisa:str):
@@ -167,9 +168,10 @@ class DoarPersonagem(commands.Cog):
             if not franquia.franquia_personagem in franquias:
                 franquias.append(franquia.franquia_personagem)
         for sonas in franquias:
-            sonas_option = app_commands.Choice(name=f"{sonas}", value=f"{sonas}")
-            opcaoes.append(sonas_option)
-        return opcaoes
+            if pesquisa.lower() in sonas.lower():
+                sonas_option = app_commands.Choice(name=f"{sonas}", value=f"{sonas}")
+                opcaoes.append(sonas_option)
+        return opcaoes[:25]
 
 
 async def setup(bot):

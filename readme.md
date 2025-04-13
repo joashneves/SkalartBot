@@ -18,12 +18,12 @@ Esse é o começo do bot, sua explicação, seu funcionamento, comandos e como f
 
 1. O primeiro comando para instalar as dependências:
    ```bash
-   pip install -e .
+   pip install -r requirements.txt
    ```
 
 2. O segundo comando para iniciar o bot:
    ```bash
-   discord-bot
+   python main.py
    ```
 
 ---

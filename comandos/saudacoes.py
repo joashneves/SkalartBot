@@ -65,14 +65,13 @@ class MonitorarSaudacoes(commands.Cog):
                     if boanoite["data_boanoite"].date() != dia_atual:
                         print(boanoite["data_boanoite"], dia_atual)
                         Manipular_dia.registrar_boanoite(message.author.id)
-                        await message.channel.send(f"Boa noite")
+                        
                     else:
                         return
                 else:
                     Manipular_dia.registrar_boanoite(message.author.id)
                     await message.channel.send(f"Boa noite, {message.author.mention}!")
             else:
-                await message.channel.send(f"Ainda não é noite")
                 return
             usuario_registrado = Obter_Usuario.Manipular_Usuario.obter_usuario(
                 id_discord
