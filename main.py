@@ -21,8 +21,6 @@ permissoes.message_content = True
 permissoes.members = True
 
 """Atribui um único cargo automaticamente a novos membros, caso o membro não tenha nenhum dos cargos."""
-
-
 async def atribuir_cargos(member: discord.Member):
     id_guild = str(member.guild.id)
     cargos_ids = Obter_cargo.Manipular_Cargo.obter_Cargo(id_guild)

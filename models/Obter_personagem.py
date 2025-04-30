@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from models.db import _Sessao, Personagem
+from sqlalchemy import func
 import os
 import random
 
@@ -47,6 +48,15 @@ class Manipular_Personagem:
                                          data_de_descoberta=data_de_descoberta)
             sessao.add(novo_personagem)
             sessao.commit()
+
+    def Obter_um_personagem(guild_id, nome_personagem, franquia_personagem):
+        with _Sessao() as sessao:
+            personagem = sessao.query(Personagem).filter(
+                Personagem.guild_id == guild_id,
+                func.lower(Personagem.nome_personagem) == nome_personagem.lower(),
+                func.lower(Personagem.franquia_personagem) == franquia_personagem.lower()
+            ).first()
+            return personagem
 
     def alterar_dono_personage(id_novo_discord,
                                id_discord,

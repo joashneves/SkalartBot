@@ -148,6 +148,24 @@ class Personagens(commands.Cog):
             await interaction.response.send_message(view=view, embed=embed, file=imagem)
         else:
             await interaction.response.send_message("Nenhum personagem encontrado")
+            
+    @app_commands.command(
+    name="verificar_personagem",
+    description="Verifica se um personagem foi descoberto neste servidor.",
+    )
+    @app_commands.describe(nome="Nome do personagem", franquia="Nome da franquia")
+    async def verificar_personagem(self, interaction: discord.Interaction, nome: str, franquia: str):
+        personagem = Manipular_Personagem.Obter_um_personagem(interaction.guild.id, nome, franquia)
+        
+        if personagem:
+            user = await self.bot.fetch_user(personagem.id_discord)
+            await interaction.response.send_message(
+                f"✅ O personagem **{nome}** da franquia **{franquia}** já foi descoberto por {user.mention}!"
+            )
+        else:
+            await interaction.response.send_message(
+                f"❌ O personagem **{nome}** da franquia **{franquia}** ainda não foi descoberto neste servidor."
+            )
 
 async def setup(bot):
     await bot.add_cog(Personagens(bot))
