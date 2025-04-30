@@ -70,7 +70,7 @@ class PersonagensView(discord.ui.View):
         )
         embed.set_image(url=f"attachment://image.jpg")
         print(caminho_arquivo)
-        embed.set_footer(text="Api utilizada")
+        embed.set_footer(text=f"{self.franquia}")
         return embed
 
     async def imagem(self):
@@ -171,29 +171,32 @@ class Game(commands.Cog):
         id_player = ctx.author.id
         id_guild = ctx.guild.id
         try:
+            # Verifica se o jogador já atingiu o limite de tentativas
             if id_player in NUM_JOGADAS and id_guild in NUM_JOGADAS[id_player] and NUM_JOGADAS[id_player][id_guild][1] <= 0:
-                await ctx.send("Quantidade de adivinhação vencida tente novamenteo mais tarde", ephemeral=True)
+                await ctx.send("Quantidade de adivinhação vencida, tente novamente mais tarde.", ephemeral=True)
                 return
 
+            # Verifica se já há alguém jogando no canal
             if ctx.channel.id in self.delymensagem:
-                await ctx.send("Alguem ja esta jogando", ephemeral=True)
+                await ctx.send("Alguém já está jogando.", ephemeral=True)
                 return
             else:
                 self.delymensagem[ctx.channel.id] = ctx.author.id
 
+            # Se não há jogo no canal, inicia um novo jogo
             if not ctx.channel.id in self.mensagem or self.mensagem[ctx.channel.id] == []:
                 if not id_player in NUM_JOGADAS:
                     NUM_JOGADAS[id_player] = {}
                 if not id_guild in NUM_JOGADAS[id_player]:
                     NUM_JOGADAS[id_player][id_guild] = [id_player, 10, False]
-                    print(f'VAR: Novo item adicionado {NUM_JOGADAS[id_player][ctx.guild.id]}')
+                    print(f'VAR: Novo item adicionado {NUM_JOGADAS[id_player][id_guild]}')
                 print(f"VAR : Numero de jogadas : {NUM_JOGADAS}")
 
                 if id_guild in NUM_JOGADAS[id_player]:   
                     if NUM_JOGADAS[ctx.author.id][id_guild][1] > 0:
-                        print("Indo")
-                        print(f" VAR : Numenro de tentativas {NUM_JOGADAS}")
-                        await ctx.send(f"carregando a imagem, aguarde... voce tem {NUM_JOGADAS[id_player][id_guild][1]} jogadas")
+                        print("Iniciando o jogo...")
+                        print(f"VAR : Numero de tentativas restantes: {NUM_JOGADAS[id_player][id_guild][1]}")
+                        await ctx.send(f"Carregando a imagem, aguarde... você tem {NUM_JOGADAS[id_player][id_guild][1]} tentativas.")
                         try:
                             req = requests.get("https://personagensaleatorios.squareweb.app/api/Personagems")
                             content = json.loads(req.content)
@@ -204,37 +207,32 @@ class Game(commands.Cog):
                             print("VAR : mensagem = ", msg)
                             res = await view.deletar_arquivo()
                             del self.delymensagem[ctx.channel.id]
-                            self.mensagem[msg.channel.id] = ([ msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5, content["id"], content["gender"], content["franquia"]["name"], content["caminhoArquivo"]])
+                            self.mensagem[msg.channel.id] = ([msg.id, msg.channel.id, msg.guild.id, content["name"], True, ctx.author.id, 5, content["id"], content["gender"], content["franquia"]["name"], content["caminhoArquivo"]])
+
+                            # Configura o temporizador para finalizar o jogo após o tempo limite
                             async with TaskGroup() as group:
-                                try:
-                                    if msg.channel.id in self.mensagem:
-                                        tesk = group.create_task(self.temporizador(ctx, msg.channel.id, msg.id, 26))
-                                        if tesk:
-                                            tesk.cancel()
-                                            group.create_task(self.temporizador(ctx, msg.channel.id, msg.id, 26))                     
-                                    print(f"VAR : nova self.mensagem = {self.mensagem}")
-                                    if NUM_JOGADAS[ctx.author.id][id_guild][1] == 10:
-                                        group.create_task(reset_num_jogadas(ctx.author.id, id_guild,60*30))
-                                    NUM_JOGADAS[ctx.author.id][id_guild][1] = NUM_JOGADAS[ctx.author.id][id_guild][1] - 1
-                                except asyncio.CancelledError:
-                                    print("ALARM : Event loop was cancelled")
-                                except Exception as e:
-                                    print(f"AVISO ERROR : em event loop {e}")
-                                    if ctx.channel.id in self.delymensagem:
-                                        del self.delymensagem[ctx.channel.id]
+                                if msg.channel.id in self.mensagem:
+                                    group.create_task(self.temporizador(ctx, msg.channel.id, msg.id, 26))   
+                                print(f"VAR : nova self.mensagem = {self.mensagem}")
+                                if NUM_JOGADAS[ctx.author.id][id_guild][1] == 10:
+                                    group.create_task(reset_num_jogadas(ctx.author.id, id_guild, 60 * 30))  # Reset após 30 minutos
+
+                                NUM_JOGADAS[ctx.author.id][id_guild][1] -= 1  # Diminui as tentativas
                         except requests.RequestException as e:
                             await ctx.send("Erro ao obter o personagem. Tente novamente mais tarde.", ephemeral=True)
                             print(f"Erro na requisição: {e}")
                     else:
-                        await ctx.send("Quantidade de adivinhação vencida tente novamente mais tarde", ephemeral=True)
+                        await ctx.send("Quantidade de adivinhações vencida, tente novamente mais tarde.", ephemeral=True)
 
             else:
-                await ctx.send("um jogo ja esta em andamento", ephemeral=True)
+                await ctx.send("Um jogo já está em andamento.", ephemeral=True)
+
         except Exception as e:
             if ctx.channel.id in self.delymensagem:
                 del self.delymensagem[ctx.channel.id]
-            print(f"AVISO DE ERROR : Error em $jogar {e}")
-            await ctx.send("Ocorreu um erro ")
+            print(f"AVISO DE ERROR: Erro em $jogar {e}")
+            await ctx.send("Ocorreu um erro.")
+
 
     @jogar.error
     async def jogar_error(self, ctx, err):
