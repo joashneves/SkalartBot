@@ -7,7 +7,7 @@ from models import Obter_cargo
 
 class ConfirmarRoletaView(discord.ui.View):
     def __init__(self, interaction: discord.Interaction, bot: discord.Client):
-        super().__init__(timeout=30)
+        super().__init__(timeout=None)
         self.interaction = interaction
         self.bot = bot
 
@@ -16,46 +16,66 @@ class ConfirmarRoletaView(discord.ui.View):
         if interaction.user != self.interaction.user:
             await interaction.response.send_message("Você não tem permissão para usar este botão.", ephemeral=True)
             return
+            # Apagar a mensagem original com os botões antes de começar a tarefa
 
+        # Apagar a mensagem original que contém o botão
+        await interaction.message.delete()
+
+        message = await interaction.channel.send("Roletando os cargos...")
         guild = self.interaction.guild
         id_guild = str(guild.id)
-        cargos_ids = Obter_cargo.Manipular_Cargo.obter_Cargo(id_guild)
+        print(f"Esta pensando em : Guild ID: {id_guild}")
 
+        cargos_ids = Obter_cargo.Manipular_Cargo.obter_Cargo(id_guild)
         cargos_validos = [discord.utils.get(guild.roles, id=int(cid)) for cid in cargos_ids]
         cargos_validos = [c for c in cargos_validos if c]
 
         if not cargos_validos:
-            await interaction.response.edit_message(content="Os cargos não existem mais no servidor.", view=None)
+            await message.edit(content="❌ Os cargos não existem mais no servidor.", view=None)
             return
 
         membros_afetados = 0
+        bot_member = guild.get_member(self.bot.user.id)
+        bot_top_role = bot_member.top_role
+
         for member in guild.members:
             if member.bot:
                 continue
-            # Filtrar apenas os cargos abaixo do cargo do bot
-            bot_member = interaction.guild.get_member(self.bot.user.id)
-            bot_top_role = bot_member.top_role
 
-            cargos_a_remover = [cargo for cargo in member.roles if cargo < bot_top_role and cargo.id in cargos_ids]
+            cargos_do_membro_para_remover = [
+                cargo for cargo in member.roles
+                if cargo < bot_top_role and cargo in cargos_validos
+            ]
 
-            if cargos_a_remover:
-                await member.remove_roles(*cargos_a_remover)
+            if cargos_do_membro_para_remover:
+                print(f"Ação: Removendo cargos de {member.name}: {[c.name for c in cargos_do_membro_para_remover]}")
+                await member.remove_roles(*cargos_do_membro_para_remover)
 
-            novo_cargo = random.choice(cargos_validos)
-            await member.add_roles(novo_cargo)
-            membros_afetados += 1
+            if not any(cargo in member.roles for cargo in cargos_validos):
+                novo_cargo = random.choice(cargos_validos)
+                await member.add_roles(novo_cargo)
+                membros_afetados += 1
+                print(f"Ação: {member.name} recebeu o cargo {novo_cargo.name}")
 
-        await interaction.response.edit_message(
-            content=f"✅ Todos os cargos foram rerolados! Membros afetados: `{membros_afetados}`.",
+        print(f"Rerolagem concluída. Total de membros afetados: {membros_afetados}")
+    
+        # Edita a mensagem original com os botões desativados
+        await message.edit(
+            content=f"✅ Todos os cargos foram rerolados!\n👥 Membros afetados: `{membros_afetados}`.",
             view=None
         )
+
 
     @discord.ui.button(label="Não", style=discord.ButtonStyle.danger)
     async def cancelar(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user != self.interaction.user:
             await interaction.response.send_message("Você não pode cancelar esta ação.", ephemeral=True)
             return
-        await interaction.response.edit_message(content="❌ Ação cancelada.", view=None)
+        for child in self.children:
+            if isinstance(child, discord.ui.Button):
+                child.disabled = True
+
+        await interaction.response.edit_message(content="❌ Ação cancelada.", view=self)
 
 class Cargos(commands.Cog):
     def __init__(self, bot: commands.Bot):

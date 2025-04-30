@@ -48,6 +48,11 @@ class AjudaSelect(Select):
             discord.SelectOption(
                 label="Links", description="Convite e repositório do bot.", emoji="🔗"
             ),
+            discord.SelectOption(
+                label="Jogo de Personagens",
+                description="Capture e adivinhe personagens com $jogar.",
+                emoji="🎮",
+            ),
         ]
         super().__init__(placeholder="Escolha uma opção...", options=options)
 
@@ -143,6 +148,20 @@ class AjudaSelect(Select):
                 "- Apenas o criador do ticket e os administradores podem visualizar e interagir com o ticket.\n"
                 "- Os tickets podem ser fechados com `/apagar_ticket`.\n"
             )
+        elif escolha == "Jogo de Personagens":
+            embed.description = (
+                "🎮 **Jogo de Personagens:**\n"
+                "Participe do jogo de adivinhação e captura de personagens com o comando `$jogar`!\n\n"
+                "**Como funciona:**\n"
+                "- Ao usar `$jogar`, o bot sorteia um personagem misterioso.\n"
+                "- Tente adivinhar quem é digitando o nome do personagem no chat.\n"
+                "- Se acertar, o personagem será **capturado e adicionado à sua coleção**.\n\n"
+                "**O que você pode fazer com seus personagens:**\n"
+                "- Ver sua coleção e editar as descrições com `/listar_personagens`.\n"
+                "- Doar personagens para outros jogadores com `/doar_personagem`.\n\n"
+                "**Dica:** Quanto mais você jogar, maior será sua coleção!\n"
+            )
+
 
         await interaction.response.edit_message(embed=embed)
 
