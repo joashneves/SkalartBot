@@ -1,8 +1,61 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
+import random
 from models import Obter_cargo
 
+
+class ConfirmarRoletaView(discord.ui.View):
+    def __init__(self, interaction: discord.Interaction, bot: discord.Client):
+        super().__init__(timeout=30)
+        self.interaction = interaction
+        self.bot = bot
+
+    @discord.ui.button(label="Sim", style=discord.ButtonStyle.success)
+    async def confirmar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user != self.interaction.user:
+            await interaction.response.send_message("Você não tem permissão para usar este botão.", ephemeral=True)
+            return
+
+        guild = self.interaction.guild
+        id_guild = str(guild.id)
+        cargos_ids = Obter_cargo.Manipular_Cargo.obter_Cargo(id_guild)
+
+        cargos_validos = [discord.utils.get(guild.roles, id=int(cid)) for cid in cargos_ids]
+        cargos_validos = [c for c in cargos_validos if c]
+
+        if not cargos_validos:
+            await interaction.response.edit_message(content="Os cargos não existem mais no servidor.", view=None)
+            return
+
+        membros_afetados = 0
+        for member in guild.members:
+            if member.bot:
+                continue
+            # Filtrar apenas os cargos abaixo do cargo do bot
+            bot_member = interaction.guild.get_member(self.bot.user.id)
+            bot_top_role = bot_member.top_role
+
+            cargos_a_remover = [cargo for cargo in member.roles if cargo < bot_top_role and cargo.id in cargos_ids]
+
+            if cargos_a_remover:
+                await member.remove_roles(*cargos_a_remover)
+
+            novo_cargo = random.choice(cargos_validos)
+            await member.add_roles(novo_cargo)
+            membros_afetados += 1
+
+        await interaction.response.edit_message(
+            content=f"✅ Todos os cargos foram rerolados! Membros afetados: `{membros_afetados}`.",
+            view=None
+        )
+
+    @discord.ui.button(label="Não", style=discord.ButtonStyle.danger)
+    async def cancelar(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user != self.interaction.user:
+            await interaction.response.send_message("Você não pode cancelar esta ação.", ephemeral=True)
+            return
+        await interaction.response.edit_message(content="❌ Ação cancelada.", view=None)
 
 class Cargos(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -61,6 +114,16 @@ class Cargos(commands.Cog):
             color=discord.Color.blue(),
         )
         await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="roletar_cargo", description="Rerola todos os cargos do servidor.")
+    @app_commands.default_permissions(manage_guild=True)
+    async def roletar_cargo(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="⚠️ Confirmação Necessária",
+            description="Essa ação é **IRREVERSÍVEL**!\nDeseja realmente rerolar os cargos de todos os membros?",
+            color=discord.Color.orange()
+        )
+        await interaction.response.send_message(embed=embed, view=ConfirmarRoletaView(interaction, self.bot))
 
     @app_commands.command(
         name="remover_cargo",
